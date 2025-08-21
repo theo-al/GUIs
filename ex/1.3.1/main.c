@@ -18,7 +18,7 @@
 int main() {
     /* INICIALIZACAO */
     SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_Window* win = SDL_CreateWindow("Hello World!",
+    SDL_Window* win = SDL_CreateWindow("Animação cíclica",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
                           WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN
@@ -33,19 +33,21 @@ int main() {
 
     float t = 0;
     while (t += 0.01) {
-            SDL_SetRenderDrawColor(ren, COR_FUNDO);
-	    SDL_RenderClear(ren);
+        SDL_SetRenderDrawColor(ren, COR_FUNDO);
+        SDL_RenderClear(ren);
 
-	    SDL_SetRenderDrawColor(ren, COR_RET);
-	    SDL_RenderFillRect(ren, &r);
+        SDL_SetRenderDrawColor(ren, COR_RET);
+        SDL_RenderFillRect(ren, &r);
 
-	    raio = RAIO_INICIAL*sin(t*2); 
+      #ifdef LISSAJOUS
+        raio = RAIO_INICIAL*sin(t*2); 
+      #endif
 
-	    r.x = CENTRO_X + raio*cos(t);
-	    r.y = CENTRO_Y + raio*sin(t);
+        r.x = CENTRO_X + raio*cos(t);
+        r.y = CENTRO_Y + raio*sin(t);
 
-	    SDL_RenderPresent(ren);
-	    SDL_Delay(10); 
+        SDL_RenderPresent(ren);
+        SDL_Delay(10); 
     }
 
     /* FINALIZACAO */
