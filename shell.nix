@@ -2,9 +2,12 @@
 
 pkgs.mkShell {
   packages = with pkgs; [
-    gcc gnumake
+    gcc
 
-    SDL2 libGL libGLU
+    SDL2 SDL2_image
+    gnumake pkg-config
+
+    #man man-pages man-pages-posix
   ];
 }
 

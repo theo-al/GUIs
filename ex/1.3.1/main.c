@@ -1,6 +1,10 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 
+#include "GIFdef.h" // para gerar o gif
+
+
+/* DEFINIÇÕES */
 #define BRANCO 0xFF,0xFF,0xFF,0x00
 #define AZUL   0x00,0x00,0xFF,0x00
 
@@ -28,11 +32,10 @@ int main() {
     /* EXECUCAO */
     float raio = RAIO_INICIAL;
     SDL_Rect r = {
-        CENTRO_X+RAIO_INICIAL*cos(0), CENTRO_Y+RAIO_INICIAL*sin(0), 10,10
+        CENTRO_X+raio*cos(0), CENTRO_Y+raio*sin(0), 10,10
     };
 
-    float t = 0;
-    while (t += 0.01) {
+    for (float t = 0 ;; t += 0.01) {
         SDL_SetRenderDrawColor(ren, COR_FUNDO);
         SDL_RenderClear(ren);
 
@@ -40,6 +43,7 @@ int main() {
         SDL_RenderFillRect(ren, &r);
 
       #ifdef LISSAJOUS
+        // faz um movimento cíclico mais complexo
         raio = RAIO_INICIAL*sin(t*2); 
       #endif
 
@@ -48,6 +52,9 @@ int main() {
 
         SDL_RenderPresent(ren);
         SDL_Delay(10); 
+
+        // salva o frame atual num png sse GERAR_GIF tiver definido
+        SALVA_FRAME(ren, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
 
     /* FINALIZACAO */
