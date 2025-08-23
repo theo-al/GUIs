@@ -11,7 +11,7 @@
 #define AZUL   0x00,0x00,0xFF,0x00
 
 #define WINDOW_WIDTH  400
-#define WINDOW_HEIGHT 200
+#define WINDOW_HEIGHT 400
 
 #define COR_FUNDO BRANCO
 #define COR_RET   AZUL
@@ -19,7 +19,8 @@
 #define CENTRO_X (WINDOW_WIDTH/2)
 #define CENTRO_Y (WINDOW_HEIGHT/2)
 
-#define RAIO_INICIAL 40
+#define RAIO_INICIAL (WINDOW_WIDTH/5)
+#define TAM_RET      (WINDOW_WIDTH/5/4)
 
 int main() {
     /* INICIALIZAÇÃO */
@@ -34,24 +35,21 @@ int main() {
     GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     float raio = RAIO_INICIAL;
-    SDL_Rect r = {
-        CENTRO_X+raio*cos(0), CENTRO_Y+raio*sin(0), 10,10
-    };
+    SDL_Rect r = { 0, 0, TAM_RET, TAM_RET };
 
     /* EXECUÇÃO */
     for (float t = 0 ;; t += 0.01) {
+        #ifdef LISSAJOUS // movimento cíclico mais complexo
+          raio = RAIO_INICIAL*sin(t*2);
+        #endif
+        r.x = CENTRO_X + raio*cos(t);
+        r.y = CENTRO_Y - raio*sin(t);
+
         SDL_SetRenderDrawColor(ren, COR_FUNDO);
         SDL_RenderClear(ren);
 
         SDL_SetRenderDrawColor(ren, COR_RET);
         SDL_RenderFillRect(ren, &r);
-
-        #ifdef LISSAJOUS // movimento cíclico mais complexo
-          raio = RAIO_INICIAL*sin(t*2);
-        #endif
-
-        r.x = CENTRO_X + raio*cos(t);
-        r.y = CENTRO_Y - raio*sin(t);
 
         GIF_FRAME(ren, 1, t > 0, t < TAU);
         SDL_RenderPresent(ren);
