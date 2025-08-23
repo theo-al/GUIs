@@ -47,11 +47,11 @@ int main() {
         SDL_RenderFillRect(ren, &r);
 
         #ifdef LISSAJOUS // movimento cíclico mais complexo
-          raio = RAIO_INICIAL*sin(t*2); 
+          raio = RAIO_INICIAL*sin(t*2);
         #endif
 
         r.x = CENTRO_X + raio*cos(t);
-        r.y = CENTRO_Y + raio*sin(t);
+        r.y = CENTRO_Y - raio*sin(t);
 
         GIF_FRAME(ren, 1, t > 0, t < TAU);
         SDL_RenderPresent(ren);
