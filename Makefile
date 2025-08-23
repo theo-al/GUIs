@@ -1,5 +1,5 @@
-CFLAGS = -Wall -Wextra -I $(LIB_DIR)
-LFLAGS = -lm -lSDL2 -L $(LIB_DIR)
+CFLAGS = -Wall -Wextra -I lib/
+LFLAGS = -lm -lSDL2 -L lib/
 
 %.out: %.c
 	gcc $< -o $@ $(CFLAGS) $(LFLAGS)
