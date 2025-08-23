@@ -1,10 +1,12 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 
-#include "GIFdef.h" // para gerar o gif
-
-
 /* DEFINIÇÕES */
+#include "gifdef.h" // macros para gerar o gif
+
+#define PI  M_PI
+#define TAU (2*PI)
+
 #define BRANCO 0xFF,0xFF,0xFF,0x00
 #define AZUL   0x00,0x00,0xFF,0x00
 
@@ -25,12 +27,11 @@ int main() {
     SDL_Window* win = SDL_CreateWindow("Animação cíclica",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN
+                          WINDOW_WIDTH, WINDOW_HEIGHT,
+                          SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
-  #ifdef GIF
-    GIF_INIT(GIF, WINDOW_WIDTH, WINDOW_HEIGHT);
-  #endif
+    GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     float raio = RAIO_INICIAL;
     SDL_Rect r = {
@@ -45,26 +46,20 @@ int main() {
         SDL_SetRenderDrawColor(ren, COR_RET);
         SDL_RenderFillRect(ren, &r);
 
-      #ifdef LISSAJOUS // movimento cíclico mais complexo
-        raio = RAIO_INICIAL*sin(t*2); 
-      #endif
+        #ifdef LISSAJOUS // movimento cíclico mais complexo
+          raio = RAIO_INICIAL*sin(t*2); 
+        #endif
 
         r.x = CENTRO_X + raio*cos(t);
         r.y = CENTRO_Y + raio*sin(t);
 
-      #ifndef GIF
+        GIF_FRAME(ren, 1, t > 0, t < TAU);
         SDL_RenderPresent(ren);
         SDL_Delay(10); 
-      #else
-        const int dt = 1;
-        if (t >= 0) GIF_FRAME(ren, dt);
-        if (t >= 2*M_PI) {
-            GIF_SAVE(); break;
-        }
-      #endif//GIF
     }
 
-    /* FINALIZACAO */
+    /* FINALIZAÇÃO */
+    GIF_SAVE();
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit(); 
