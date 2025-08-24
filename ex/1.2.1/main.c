@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "screenshot.h"
 #include "suplemento.h"
 #include "cores.h"
 
@@ -163,7 +164,7 @@ int main() {
                    tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
 
     SDL_RenderPresent(ren);
-    SDL_Delay(10000); 
+    SDL_Delay(1000); 
 
     /* FINALIZAÇÃO */
     SDL_DestroyRenderer(ren);

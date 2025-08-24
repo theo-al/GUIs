@@ -18,6 +18,7 @@
               GIF.arquivo = nome_arquivo; \
           } while(0)
 
+  //! deve dar pra simplificar redefinindo SDL Delay, RenderPresent
   #define GIF_FRAME(renderer, dt, cond_min, cond_max) { \
               if (!(cond_min)) goto GIF_CONT; \
               SDL_RenderReadPixels(renderer, NULL,           \
@@ -38,6 +39,18 @@
                   fclose(f);                                \
               msf_gif_free(gif);                            \
           } while(0)
+
+  #ifdef FURTO_DE_SCREENSHOT
+    #define SDL_Delay(...) 
+    #define SDL_RenderPresent(ren) do { \
+            GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); \
+            GIF_FRAME(ren, 2, 1, 0); \
+        } while(0)
+    #define SDL_DestroyRenderer(ren) do { \
+        GIF_SAVE(); \
+        SDL_DestroyRenderer(ren); \
+    } while (0)
+  #endif
 
   #ifndef QUALITY
     #define QUALITY 16
