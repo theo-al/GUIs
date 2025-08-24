@@ -10,8 +10,49 @@
 #define WINDOW_WIDTH  720
 #define WINDOW_HEIGHT 720
 
-/* FUNÇÕES */
-void desenho_recursivo(SDL_Renderer* ren, const uint16_t escala) {
+void desenhar_cores(SDL_Renderer* ren, const uint16_t escala);
+void desenhar_texto(SDL_Renderer* ren,
+                    const char* texto, const int tam_fonte,
+                    const int x, const int y);
+
+int main() {
+    /* INICIALIZAÇÃO */
+    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Window* win = SDL_CreateWindow("Desenho qualquer",
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          WINDOW_WIDTH, WINDOW_HEIGHT,
+                          SDL_WINDOW_SHOWN
+                      );
+    SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
+
+    /* EXECUÇÃO */
+    mudar_cor(ren, BRANCO);
+    SDL_RenderClear(ren);
+
+    const int escala = WINDOW_WIDTH*2/3;
+    desenhar_cores(ren, escala);
+
+    mudar_cor(ren, CINZA);
+    const int grande = WINDOW_WIDTH/18;
+    desenhar_texto(ren, "theo", grande, WINDOW_WIDTH - grande*6, grande);
+
+    const int tam_fonte = WINDOW_WIDTH/55, pad = tam_fonte/4;
+    desenhar_texto(ren, "tv faz quengo explodir com whisky jb",
+                   tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*2);
+    desenhar_texto(ren, "the quick brown fox jumps over the lazy dog",
+                   tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
+
+    SDL_RenderPresent(ren);
+    SDL_Delay(1000);
+
+    /* FINALIZAÇÃO */
+    SDL_DestroyRenderer(ren);
+    SDL_DestroyWindow(win);
+    SDL_Quit();
+}
+
+void desenhar_cores(SDL_Renderer* ren, const uint16_t escala) {
   #define grade(x, y, tam) { x*(tam), y*(tam), tam, tam }
     if (escala <= 1) return;
 
@@ -31,12 +72,12 @@ void desenho_recursivo(SDL_Renderer* ren, const uint16_t escala) {
         desenhar_rect(ren, quads[i].ret);
     }
 
-    desenho_recursivo(ren, escala/4);
+    desenhar_cores(ren, escala/4);
   #undef grade
 }
 
 void desenhar_texto(SDL_Renderer* ren,
-                    const char* texto, const int tam_fonte, 
+                    const char* texto, const int tam_fonte,
                     const int x, const int y) {
     const int sz  = tam_fonte;
     const int ln  = tam_fonte/8;
@@ -133,41 +174,4 @@ void desenhar_texto(SDL_Renderer* ren,
         desenhar_lista_offs(ren, FONTE[c], LEN(FONTE[c]),
                                  x+(tam_fonte+pad)*i, y);
     }
-}
-
-int main() {
-    /* INICIALIZAÇÃO */
-    SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_Window* win = SDL_CreateWindow("Desenho qualquer",
-                          SDL_WINDOWPOS_UNDEFINED,
-                          SDL_WINDOWPOS_UNDEFINED,
-                          WINDOW_WIDTH, WINDOW_HEIGHT,
-                          SDL_WINDOW_SHOWN
-                      );
-    SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
-
-    /* EXECUÇÃO */
-    mudar_cor(ren, BRANCO);
-    SDL_RenderClear(ren);
-
-    const int escala = WINDOW_WIDTH*2/3;
-    desenho_recursivo(ren, escala);
-
-
-    mudar_cor(ren, CINZA);
-    desenhar_texto(ren, "theo", 40, WINDOW_WIDTH*2/3, 40);
-
-    const int tam_fonte = 12, pad = tam_fonte/4;
-    desenhar_texto(ren, "tv faz quengo explodir com whisky jb",
-                   tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*2);
-    desenhar_texto(ren, "the quick brown fox jumped over the lazy dog",
-                   tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
-
-    SDL_RenderPresent(ren);
-    SDL_Delay(1000); 
-
-    /* FINALIZAÇÃO */
-    SDL_DestroyRenderer(ren);
-    SDL_DestroyWindow(win);
-    SDL_Quit(); 
 }
