@@ -33,7 +33,11 @@ int main() {
     const int escala = WINDOW_WIDTH*2/3;
     desenhar_cores(ren, escala);
 
+    mudar_cor(ren, AZUL);
+    SDL_RenderDrawLine(ren, WINDOW_WIDTH-4,0, WINDOW_WIDTH-4,WINDOW_HEIGHT);
+
     mudar_cor(ren, CINZA);
+
     const int grande = WINDOW_WIDTH/18;
     desenhar_texto(ren, "theo", grande, WINDOW_WIDTH - grande*6, grande);
 
@@ -42,6 +46,8 @@ int main() {
                    tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*2);
     desenhar_texto(ren, "the quick brown fox jumps over the lazy dog",
                    tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
+
+    SDL_RenderDrawPoint(ren, WINDOW_WIDTH/2, WINDOW_HEIGHT*1/3);
 
     SDL_RenderPresent(ren);
     SDL_Delay(1000);

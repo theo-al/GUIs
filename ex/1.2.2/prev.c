@@ -29,6 +29,9 @@ int main() {
     const int escala = WINDOW_WIDTH*2/3;
     desenhar_cores(ren, escala);
 
+    TFX_mudar_cor(ren, AZUL);
+    SDL_RenderDrawLine(ren, WINDOW_WIDTH-4,0, WINDOW_WIDTH-4,WINDOW_HEIGHT);
+
     TFX_mudar_cor(ren, CINZA);
 
     const int grande = WINDOW_WIDTH/18;
@@ -41,6 +44,8 @@ int main() {
                        pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*2);
     TFX_desenhar_texto(ren, "The quick brown fox jumps over the lazy dog",
                        pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
+
+    SDL_RenderDrawPoint(ren, WINDOW_WIDTH/2, WINDOW_HEIGHT*1/3);
 
     SDL_RenderPresent(ren);
     SDL_Delay(1000);
