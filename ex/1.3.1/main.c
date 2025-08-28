@@ -1,9 +1,8 @@
 #include <SDL2/SDL.h>
 #include <math.h>
+#include "gifdef.h"
 
 /* DEFINIÇÕES */
-#include "gifdef.h" // macros para gerar o gif
-
 #define PI  M_PI
 #define TAU (2*PI)
 
@@ -19,8 +18,13 @@
 #define CENTRO_X (WINDOW_WIDTH/2)
 #define CENTRO_Y (WINDOW_HEIGHT/2)
 
-#define RAIO_INICIAL (WINDOW_WIDTH/5)
-#define TAM_RET      (WINDOW_WIDTH/5/4)
+#define RAIO    (WINDOW_WIDTH/5)
+#define TAM_RET (WINDOW_WIDTH/5/4)
+
+#define VELOCIDADE 10.0 /*px/s*/
+
+#define SEGUNDO 1000 /*ms*/
+#define DT      50.0 /*ms*/
 
 int main() {
     /* INICIALIZAÇÃO */
@@ -32,18 +36,19 @@ int main() {
                           SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
-    GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-    float raio = RAIO_INICIAL;
-    SDL_Rect r = { 0, 0, TAM_RET, TAM_RET };
+    GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); //NOOP
 
     /* EXECUÇÃO */
-    for (float t = 0 ;; t += 0.01) {
+    SDL_Rect r = { 0,0, TAM_RET,TAM_RET };
+
+    for (float t = 0 ;; t += DT/SEGUNDO) {
+        const float ang = t*VELOCIDADE/RAIO;
+
+        r.x = CENTRO_X + RAIO*cos(ang);
+        r.y = CENTRO_Y - RAIO*sin(ang);
         #ifdef LISSAJOUS // movimento cíclico mais complexo
-          raio = RAIO_INICIAL*sin(t*2);
+          r.y = CENTRO_Y - RAIO*sin(ang*2); // :( vel != 10px/s
         #endif
-        r.x = CENTRO_X + raio*cos(t);
-        r.y = CENTRO_Y - raio*sin(t);
 
         SDL_SetRenderDrawColor(ren, COR_FUNDO);
         SDL_RenderClear(ren);
@@ -51,13 +56,13 @@ int main() {
         SDL_SetRenderDrawColor(ren, COR_RET);
         SDL_RenderFillRect(ren, &r);
 
-        GIF_FRAME(ren, 1, t > 0, t < TAU);
+        GIF_FRAME_COND(ren, DT, ang < TAU); //NOOP
         SDL_RenderPresent(ren);
-        SDL_Delay(10); 
+        SDL_Delay(DT);
     }
 
     /* FINALIZAÇÃO */
-    GIF_SAVE();
+    GIF_SAVE(); //NOOP
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit(); 

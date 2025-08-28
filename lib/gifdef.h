@@ -1,10 +1,25 @@
 #ifdef NOME_GIF
   #define GERAR_GIF
 #endif
+
 #ifdef GERAR_GIF
   #define MSF_GIF_IMPL
   #include "msf_gif.h"
   #include <SDL2/SDL.h>
+
+  #ifndef QUALITY // nível de qualidade das cores do gif
+    #define QUALITY 16 /*1 a 16*/
+  #endif
+  #ifndef TANTOS // de quantos em quantos frames capturar
+    #define TANTOS 1
+  #endif
+
+  #ifndef GIF_CEGO // se não mostrar na tela enquanto gera gif
+    #define GIF_CEGO 1
+  #endif
+  #ifndef GIF_RAPIDO // se desabilita SDL_Delay
+    #define GIF_RAPIDO 1
+  #endif
 
   static struct {
       MsfGifState  estado;
@@ -18,18 +33,25 @@
               GIF.arquivo = nome_arquivo; \
           } while(0)
 
-  //! deve dar pra simplificar redefinindo SDL Delay, RenderPresent
-  #define GIF_FRAME(renderer, dt, cond_min, cond_max) { \
-              if (!(cond_min)) goto GIF_CONT; \
-              SDL_RenderReadPixels(renderer, NULL,           \
+  #define GIF_FRAME(renderer, ms) do { \
+              const int dt = ms/10; \
+              SDL_RenderReadPixels(renderer, NULL, \
                                    SDL_PIXELFORMAT_ABGR8888, \
                                    GIF.superficie->pixels,   \
                                    GIF.superficie->pitch);   \
               msf_gif_frame(&GIF.estado, GIF.superficie->pixels, \
                             dt, QUALITY, GIF.superficie->pitch); \
-              if (!(cond_max)) goto GIF_END; \
-              GIF_CONT: continue; \
-          }
+          } while(0)
+
+  #define TODOS (TANTOS <= 1)
+  #define CADA(tantos, frame) ((frame % tantos) == 0)
+  #define GIF_FRAME_COND(renderer, dt, cond) do { \
+              static int fr, tt; tt += dt; \
+              if (TODOS || CADA(TANTOS, fr)) { \
+                  GIF_FRAME(renderer, tt); tt = 0; \
+              } fr++; \
+              if (!(cond)) goto GIF_END; \
+          } while(0)
 
   #define GIF_SAVE() GIF_END: do { \
               SDL_FreeSurface(GIF.superficie); \
@@ -40,23 +62,27 @@
               msf_gif_free(gif);                            \
           } while(0)
 
+  #if GIF_CEGO
+    #define SDL_RenderPresent(...)
+  #endif
+  #if GIF_RAPIDO
+    #define SDL_Delay(...)
+  #endif
+
   #ifdef FURTO_DE_SCREENSHOT
-    #define SDL_Delay(...) 
+    #undef SDL_RenderPresent
     #define SDL_RenderPresent(ren) do { \
             GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); \
-            GIF_FRAME(ren, 2, 1, 0); \
+            GIF_FRAME_COND(ren, 1, 0); \
         } while(0)
     #define SDL_DestroyRenderer(ren) do { \
         GIF_SAVE(); \
         SDL_DestroyRenderer(ren); \
     } while (0)
   #endif
-
-  #ifndef QUALITY
-    #define QUALITY 16
-  #endif
 #else
   #define GIF_INIT(...)
   #define GIF_FRAME(...)
+  #define GIF_FRAME_COND(...)
   #define GIF_SAVE(...)
 #endif//GERAR_GIF
