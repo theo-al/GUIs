@@ -2,4 +2,6 @@
 *.o
 *.a
 
+*.gif
+*.png
 *.pdf
