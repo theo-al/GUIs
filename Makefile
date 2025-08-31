@@ -1,6 +1,5 @@
-ALL = $(shell ls ex/)
-SRC = $(patsubst %, %/main.c, $(ALL))
-OBJ = $(patsubst %.c, %.out, $(SRC))
+EXS = $(shell ls ex/)
+ALL = $(patsubst %, ex/%/, $(EXS))
 
 CFLAGS = -Wall -Wextra -I lib/
 LFLAGS = -lm -lSDL2 -lSDL2_gfx
@@ -9,8 +8,9 @@ ifneq ($(shell command -v pkg-config;),)
     CFLAGS += $(shell pkg-config --cflags sdl2)
 endif
 
-all: $(ALL)
-$(ALL): %: ex/%/main.out ex/%/main.gif
+all: $(EXS)
+$(EXS): %: ex/%/
+$(ALL): %/: %/main.out %/main.gif
 
 %.out: %.c
 	gcc $< -o $@ $(CFLAGS) $(LFLAGS)
@@ -21,4 +21,8 @@ $(ALL): %: ex/%/main.out ex/%/main.gif
 %.gif: %.gif.out
 	$< && rm $<
 
-.PHONY: all $(ALL)
+
+.PHONY: all $(ALL) $(EXS)
+
+# compilar códigos extras ilegalm̃
+include Args.mk
