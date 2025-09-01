@@ -74,10 +74,11 @@
   #ifdef FURTO
     #define SDL_Init(...) do { \
         SDL_Init(__VA_ARGS__); \
-        GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); \
+        GIF_INIT(NOME_GIF, WIDTH, HEIGHT); \
     } while(0)
 
     #ifndef GIF_INTERATIVO
+        #undef  SDL_RenderPresent
         #define SDL_RenderPresent(ren) \
                 GIF_FRAME_COND(ren, 10, !SCREENSHOT)
     #else

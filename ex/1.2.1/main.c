@@ -7,8 +7,8 @@
 /* DEFINIÇÕES */
 #define LEN(arr) (sizeof(arr)/sizeof(*arr))
 
-#define WINDOW_WIDTH  720
-#define WINDOW_HEIGHT 720
+#define WIDTH  720
+#define HEIGHT 720
 
 void desenhar_cores(SDL_Renderer* ren, const uint16_t escala);
 void desenhar_texto(SDL_Renderer* ren,
@@ -21,8 +21,7 @@ int main() {
     SDL_Window* win = SDL_CreateWindow("Desenho qualquer",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          WINDOW_WIDTH, WINDOW_HEIGHT,
-                          SDL_WINDOW_SHOWN
+                          WIDTH, HEIGHT, SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
 
@@ -30,24 +29,24 @@ int main() {
     mudar_cor(ren, BRANCO);
     SDL_RenderClear(ren);
 
-    const int escala = WINDOW_WIDTH*2/3;
+    const int escala = WIDTH*2/3;
     desenhar_cores(ren, escala);
 
     mudar_cor(ren, AZUL);
-    SDL_RenderDrawLine(ren, WINDOW_WIDTH-4,0, WINDOW_WIDTH-4,WINDOW_HEIGHT);
+    SDL_RenderDrawLine(ren, WIDTH-4,0, WIDTH-4,HEIGHT);
 
     mudar_cor(ren, CINZA);
 
-    const int grande = WINDOW_WIDTH/18;
-    desenhar_texto(ren, "theo", grande, WINDOW_WIDTH - grande*6, grande);
+    const int grande = WIDTH/18;
+    desenhar_texto(ren, "theo", grande, WIDTH - grande*6, grande);
 
-    const int tam_fonte = WINDOW_WIDTH/55, pad = tam_fonte/4;
+    const int tam_fonte = WIDTH/55, pad = tam_fonte/4;
     desenhar_texto(ren, "tv faz quengo explodir com whisky jb",
-                   tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*2);
+                   tam_fonte, pad, WIDTH - pad - (tam_fonte+pad)*2);
     desenhar_texto(ren, "the quick brown fox jumps over the lazy dog",
-                   tam_fonte, pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
+                   tam_fonte, pad, WIDTH - pad - (tam_fonte+pad)*3);
 
-    SDL_RenderDrawPoint(ren, WINDOW_WIDTH/2, WINDOW_HEIGHT*1/3);
+    SDL_RenderDrawPoint(ren, WIDTH/2, HEIGHT*1/3);
 
     SDL_RenderPresent(ren);
     SDL_Delay(1000);

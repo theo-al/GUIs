@@ -1,17 +1,16 @@
 #include <SDL2/SDL.h>
-#include "TFX.h"
 #include "screenshot.h"
-#include "cores.h"
+#include "TFX.h"
 
 
 /* DEFINIÇÕES */
 #define QTD_BLOCOS 5
 
-#define WINDOW_WIDTH  720
-#define WINDOW_HEIGHT 720
+#define WIDTH  720
+#define HEIGHT 720
 
-#define W WINDOW_WIDTH
-#define H WINDOW_HEIGHT
+#define W WIDTH
+#define H HEIGHT
 
 void desenhar_cores(SDL_Renderer* ren, const uint16_t escala);
 
@@ -21,8 +20,7 @@ int main() {
     SDL_Window* win = SDL_CreateWindow("Desenho qualquer",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          WINDOW_WIDTH, WINDOW_HEIGHT,
-                          SDL_WINDOW_SHOWN
+                          WIDTH, HEIGHT, SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
 

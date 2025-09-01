@@ -4,8 +4,6 @@
 
 #define WIDTH 200
 #define HEIGHT 100
-#define WINDOW_WIDTH WIDTH
-#define WINDOW_HEIGHT HEIGHT
 
 #define RW 10
 #define RH RW

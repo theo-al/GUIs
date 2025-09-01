@@ -7,8 +7,8 @@
 /* DEFINIÇÕES */
 #define LEN(arr) (sizeof(arr)/sizeof(*arr))
 
-#define WINDOW_WIDTH  720
-#define WINDOW_HEIGHT 720
+#define WIDTH  720
+#define HEIGHT 720
 
 void desenhar_cores(SDL_Renderer* ren, const uint16_t escala);
 
@@ -18,34 +18,33 @@ int main() {
     SDL_Window* win = SDL_CreateWindow("Desenho qualquer",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          WINDOW_WIDTH, WINDOW_HEIGHT,
-                          SDL_WINDOW_SHOWN
+                          WIDTH, HEIGHT, SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
 
     /* EXECUÇÃO */
     TFX_limpar_tela_cor(ren, BRANCO);
 
-    const int escala = WINDOW_WIDTH*2/3;
+    const int escala = WIDTH*2/3;
     desenhar_cores(ren, escala);
 
     TFX_mudar_cor(ren, AZUL);
-    SDL_RenderDrawLine(ren, WINDOW_WIDTH-4,0, WINDOW_WIDTH-4,WINDOW_HEIGHT);
+    SDL_RenderDrawLine(ren, WIDTH-4,0, WIDTH-4,HEIGHT);
 
     TFX_mudar_cor(ren, CINZA);
 
-    const int grande = WINDOW_WIDTH/18;
+    const int grande = WIDTH/18;
     TFX_mudar_tamanho_fonte(grande);
-    TFX_desenhar_texto(ren, "THEO", WINDOW_WIDTH - grande*6, grande);
+    TFX_desenhar_texto(ren, "THEO", WIDTH - grande*6, grande);
 
-    const int tam_fonte = WINDOW_WIDTH/55, pad = tam_fonte/4;
+    const int tam_fonte = WIDTH/55, pad = tam_fonte/4;
     TFX_mudar_tamanho_fonte(tam_fonte);
     TFX_desenhar_texto(ren, "TV faz quengo explodir com whisky JB",
-                       pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*2);
+                       pad, WIDTH - pad - (tam_fonte+pad)*2);
     TFX_desenhar_texto(ren, "The quick brown fox jumps over the lazy dog",
-                       pad, WINDOW_WIDTH - pad - (tam_fonte+pad)*3);
+                       pad, WIDTH - pad - (tam_fonte+pad)*3);
 
-    SDL_RenderDrawPoint(ren, WINDOW_WIDTH/2, WINDOW_HEIGHT*1/3);
+    SDL_RenderDrawPoint(ren, WIDTH/2, HEIGHT*1/3);
 
     SDL_RenderPresent(ren);
     SDL_Delay(1000);

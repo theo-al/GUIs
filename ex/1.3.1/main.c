@@ -9,17 +9,17 @@
 #define BRANCO 0xFF,0xFF,0xFF,0x00
 #define AZUL   0x00,0x00,0xFF,0x00
 
-#define WINDOW_WIDTH  400
-#define WINDOW_HEIGHT 400
+#define WIDTH  400
+#define HEIGHT 400
 
 #define COR_FUNDO BRANCO
 #define COR_RET   AZUL
 
-#define CENTRO_X (WINDOW_WIDTH/2)
-#define CENTRO_Y (WINDOW_HEIGHT/2)
+#define CENTRO_X (WIDTH/2)
+#define CENTRO_Y (HEIGHT/2)
 
-#define RAIO    (WINDOW_WIDTH/5)
-#define TAM_RET (WINDOW_WIDTH/5/4)
+#define RAIO    (WIDTH/5)
+#define TAM_RET (WIDTH/5/4)
 
 #define VELOCIDADE 10.0 /*px/s*/
 
@@ -32,11 +32,10 @@ int main() {
     SDL_Window* win = SDL_CreateWindow("Animação cíclica",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          WINDOW_WIDTH, WINDOW_HEIGHT,
-                          SDL_WINDOW_SHOWN
+                          WIDTH, HEIGHT, SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
-    GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); //NOOP
+    GIF_INIT(NOME_GIF, WIDTH, HEIGHT); //NOOP
 
     /* EXECUÇÃO */
     SDL_Rect r = { 0,0, TAM_RET,TAM_RET };
@@ -47,7 +46,7 @@ int main() {
         r.x = CENTRO_X + RAIO*cos(ang);
         r.y = CENTRO_Y - RAIO*sin(ang);
         #ifdef LISSAJOUS // movimento cíclico mais complexo
-          r.y = CENTRO_Y - RAIO*sin(ang*2); // :( vel != 10px/s
+          r.y = CENTRO_Y - RAIO*sin(ang*2); // vel != 10px/s :(
         #endif
 
         SDL_SetRenderDrawColor(ren, COR_FUNDO);
