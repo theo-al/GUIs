@@ -14,11 +14,9 @@
     #define TANTOS 1
   #endif
 
-  #ifndef GIF_CEGO // se não mostrar na tela enquanto gera gif
-    #define GIF_CEGO 1
-  #endif
-  #ifndef GIF_RAPIDO // se desabilita SDL_Delay
-    #define GIF_RAPIDO 1
+  #ifndef GIF_INTERATIVO
+    #define SDL_RenderPresent(...)
+    #define SDL_Delay(...)
   #endif
 
   static struct {
@@ -29,7 +27,8 @@
 
   #define GIF_INIT(nome_arquivo, w, h) do { \
               msf_gif_begin(&GIF.estado, w, h); \
-              GIF.superficie = SDL_CreateRGBSurface(0, w,h,32, 0, 0, 0, 0); \
+              GIF.superficie = SDL_CreateRGBSurface(0, w,h,32, \
+                                                    0,0,0,0);  \
               GIF.arquivo = nome_arquivo; \
           } while(0)
 
@@ -62,24 +61,37 @@
               msf_gif_free(gif);                            \
           } while(0)
 
-  #if GIF_CEGO
-    #define SDL_RenderPresent(...)
-  #endif
-  #if GIF_RAPIDO
-    #define SDL_Delay(...)
+  #ifdef FURTO_DE_SCREENSHOT
+    #define FURTO
+    #define SCREENSHOT 1
   #endif
 
-  #ifdef FURTO_DE_SCREENSHOT
-    #undef SDL_RenderPresent
-    #define SDL_RenderPresent(ren) do { \
-            GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); \
-            GIF_FRAME_COND(ren, 1, 0); \
+  #ifdef FURTO_DE_GIF
+    #define FURTO
+    #define SCREENSHOT 0
+  #endif
+
+  #ifdef FURTO
+    #define SDL_CreateRenderer(...) \
+        SDL_CreateRenderer(__VA_ARGS__); \
+        GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    #ifndef GIF_INTERATIVO
+        #define SDL_RenderPresent(ren) \
+                GIF_FRAME_COND(ren, 10, !SCREENSHOT)
+    #else
+        #define SDL_RenderPresent(ren) do { \
+            GIF_FRAME_COND(ren, 10, !SCREENSHOT); \
+            SDL_RenderPresent(ren); \
         } while(0)
+    #endif
+
     #define SDL_DestroyRenderer(ren) do { \
         GIF_SAVE(); \
         SDL_DestroyRenderer(ren); \
     } while (0)
   #endif
+
 #else
   #define GIF_INIT(...)
   #define GIF_FRAME(...)

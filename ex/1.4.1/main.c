@@ -1,13 +1,16 @@
 #include <SDL2/SDL.h>
+#include "screencapture.h"
 #include "TFX.h"
 
 #define WIDTH 200
 #define HEIGHT 100
+#define WINDOW_WIDTH WIDTH
+#define WINDOW_HEIGHT HEIGHT
 
-#define W 10
-#define H W
+#define RW 10
+#define RH RW
 
-#define MAX_RECTS (10 + 1)
+#define MAX_RECTS 10
 
 int main () {
     /* INICIALIZACAO */
@@ -21,26 +24,24 @@ int main () {
 
     /* EXECUÇÃO */
     size_t num_rects = 1;
-    struct cor cores[MAX_RECTS] = {
+    struct cor cores[MAX_RECTS+1] = {
         AZUL,
         VERDE, AMARELO, VERMELHO, PRETO, AZUL_BEBE,
         CIANO, LARANJA, VERMELHO_M, CINZA, MAGENTA,
     };
-    SDL_Rect rect[MAX_RECTS] = {
-        [0] = { 40,20, W,H },
+    SDL_Rect rect[MAX_RECTS+1] = {
+        [0] = { 40,20, RW,RH },
     };
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
         TFX_limpar_tela_cor(ren, BRANCO);
-        for (size_t i = 0; i < LEN(rect); i++) {
-            TFX_desenhar_rect_cor(ren, rect[i], cores[i]);
-        }
+        TFX_desenhar_rects_cor(ren, rect, cores, num_rects);
         SDL_RenderPresent(ren);
 
         SDL_WaitEvent(&evt);
         switch (evt.type) {
           case SDL_MOUSEBUTTONUP: if (num_rects < LEN(rect)) {
                rect[num_rects++] = (SDL_Rect) {
-                   evt.button.x -W/2, evt.button.y -H/2, W, H
+                   evt.button.x -RW/2, evt.button.y -RH/2, RW, RH
                };
           } break;
           case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
@@ -51,10 +52,10 @@ int main () {
           } break;
         }
 
-        if (rect->y   < 0)      rect->y = 0;
-        if (rect->y+H > HEIGHT) rect->y = HEIGHT - H;
-        if (rect->x   < 0)     rect->x = 0;
-        if (rect->x+W > WIDTH) rect->x = WIDTH - W;
+        if (rect->y    < 0)      rect->y = 0;
+        if (rect->y+RH > HEIGHT) rect->y = HEIGHT - RH;
+        if (rect->x    < 0)      rect->x = 0;
+        if (rect->x+RW > WIDTH)  rect->x = WIDTH - RW;
     }
 
     /* FINALIZACAO */
