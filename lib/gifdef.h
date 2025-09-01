@@ -72,9 +72,10 @@
   #endif
 
   #ifdef FURTO
-    #define SDL_CreateRenderer(...) \
-        SDL_CreateRenderer(__VA_ARGS__); \
-        GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT)
+    #define SDL_Init(...) do { \
+        SDL_Init(__VA_ARGS__); \
+        GIF_INIT(NOME_GIF, WINDOW_WIDTH, WINDOW_HEIGHT); \
+    } while(0)
 
     #ifndef GIF_INTERATIVO
         #define SDL_RenderPresent(ren) \
@@ -89,7 +90,7 @@
     #define SDL_DestroyRenderer(ren) do { \
         GIF_SAVE(); \
         SDL_DestroyRenderer(ren); \
-    } while (0)
+    } while(0)
   #endif
 
 #else
