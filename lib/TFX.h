@@ -59,6 +59,13 @@ void TFX_desenhar_rect_offs(SDL_Renderer* ren,
 }
 
 TFXDEF
+void TFX_desenhar_rect_cor(SDL_Renderer* ren,
+                           SDL_Rect ret, const struct cor cor) {
+    TFX_mudar_cor(ren, cor);
+    TFX_desenhar_rect(ren, ret);
+}
+
+TFXDEF
 void TFX_desenhar_lista_rect_offs(SDL_Renderer* ren,
                                   const struct SDL_Rect* rects,
                                   const size_t len,
