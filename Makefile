@@ -1,5 +1,6 @@
-EXS = $(shell ls ex/)
-ALL = $(patsubst %, ex/%/, $(EXS))
+EXS := $(filter-out 0.2, $(shell ls ex/))
+ALL := $(patsubst %, ex/%/, $(EXS))
+GIF := $(patsubst %, %/main.gif, $(ALL))
 
 CFLAGS = -Wall -Wextra -I lib/
 LFLAGS = -lm -lSDL2 -lSDL2_gfx
@@ -9,8 +10,10 @@ ifneq ($(shell command -v pkg-config;),)
 endif
 
 all: $(EXS)
+gifs: $(GIF)
+
 $(EXS): %: ex/%/
-$(ALL): %/: %/main.out %/main.gif
+$(ALL): %/: %/main.out %/main.gif.out
 
 %.out: %.c
 	gcc $< -o $@ $(CFLAGS) $(LFLAGS)
@@ -22,7 +25,7 @@ $(ALL): %/: %/main.out %/main.gif
 	$< && rm $<
 
 
-.PHONY: all $(ALL) $(EXS)
+.PHONY: all gifs $(ALL) $(EXS)
 
-# compilar códigos extras ilegalm̃
+# bruxaria pra extras
 include Args.mk
