@@ -1,3 +1,6 @@
+#ifndef _TFX_H_
+#define _TFX_H_
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include "cores.h"
@@ -20,6 +23,14 @@ TFX_Box rect_para_caixa(SDL_Rect rect) {
     return (TFX_Box){ rect.x, rect.y, rect.x+rect.w, rect.y+rect.h };
 }
 
+TFXDEF
+SDL_Rect rect_f_para_rect(SDL_FRect ret) {
+    return (SDL_Rect) {
+        .x = (long)ret.x, .y = (long)ret.y,
+        .w = (long)ret.w, .h = (long)ret.h,
+    };
+}
+
 
 /* GERAL */
 
@@ -29,25 +40,61 @@ void TFX_limpar_tela(SDL_Renderer* ren) {
 }
 
 TFXDEF
-void TFX_limpar_tela_cor(SDL_Renderer* ren, struct cor cor) {
+void TFX_limpar_tela_cor(SDL_Renderer* ren, SDL_Color cor) {
     SDL_SetRenderDrawColor(ren, splat(cor));
     SDL_RenderClear(ren);
 }
 
 TFXDEF
-void TFX_mudar_cor(SDL_Renderer* ren, struct cor cor) {
+void TFX_mudar_cor(SDL_Renderer* ren, SDL_Color cor) {
     SDL_SetRenderDrawColor(ren, splat(cor));
 }
 
 TFXDEF
-struct cor TFX_cor_atual(SDL_Renderer *renderer) {
-    struct cor cor;
+SDL_Color TFX_cor_atual(SDL_Renderer *renderer) {
+    SDL_Color cor;
     SDL_GetRenderDrawColor(renderer, splat(&cor));
     return cor;
 }
 
 
 /* RECT */
+
+TFXDEF
+void TFX_ClampRectPos(SDL_Rect* ret, const SDL_Rect win) {
+    if (ret->x < win.x) ret->x = win.x;
+    if (ret->y < win.y) ret->y = win.y;
+
+    if (ret->x+ret->w > win.x+win.w) ret->x = win.x+win.w - ret->w;
+    if (ret->y+ret->h > win.y+win.h) ret->y = win.y+win.h - ret->h;
+}
+
+TFXDEF
+void TFX_ClampRectPosF(SDL_FRect* ret, const SDL_Rect win) {
+    if (ret->x < win.x) ret->x = win.x;
+    if (ret->y < win.y) ret->y = win.y;
+
+    if (ret->x+ret->w > win.x+win.w) ret->x = win.x+win.w - ret->w;
+    if (ret->y+ret->h > win.y+win.h) ret->y = win.y+win.h - ret->h;
+}
+
+TFXDEF
+void TFX_WrapRectPos(SDL_Rect* ret, const SDL_Rect win) {
+    if (ret->x < win.x) ret->x = win.x+win.w - ret->w;
+    if (ret->y < win.y) ret->y = win.y+win.h - ret->h;
+
+    if (ret->x+ret->w > win.x+win.w) ret->x = win.x;
+    if (ret->y+ret->h > win.y+win.h) ret->y = win.y;
+}
+
+TFXDEF
+void TFX_WrapRectPosF(SDL_FRect* ret, const SDL_Rect win) {
+    if (ret->x < win.x) ret->x = win.x+win.w - ret->w;
+    if (ret->y < win.y) ret->y = win.y+win.h - ret->h;
+
+    if (ret->x+ret->w > win.x+win.w) ret->x = win.x;
+    if (ret->y+ret->h > win.y+win.h) ret->y = win.y;
+}
 
 #define TFX_desenhar_rect(ren, ret) TFX_desenhar_rect_offs(ren, ret, 0, 0)
 
@@ -70,7 +117,7 @@ void TFX_desenhar_lista_rect_offs(SDL_Renderer* ren,
 
 TFXDEF
 void TFX_desenhar_rect_cor(SDL_Renderer* ren,
-                           SDL_Rect ret, const struct cor cor) {
+                           const SDL_Rect ret, const SDL_Color cor) {
     TFX_mudar_cor(ren, cor);
     TFX_desenhar_rect(ren, ret);
 }
@@ -78,19 +125,46 @@ void TFX_desenhar_rect_cor(SDL_Renderer* ren,
 TFXDEF
 void TFX_desenhar_rects_cor(SDL_Renderer* ren,
                             const SDL_Rect rects[],
-                            const struct cor cores[],
+                            const SDL_Color cores[],
                             size_t num_rects) {
     for (size_t i = 0; i < num_rects; i++) {
         TFX_desenhar_rect_cor(ren, rects[i], cores[i]);
     }
 }
 
+#define TFX_desenhar_rect_f(ren, ret) TFX_desenhar_rect_f_offs(ren, ret, 0, 0)
+
+TFXDEF
+void TFX_desenhar_rect_f_offs(SDL_Renderer* ren,
+                              SDL_FRect ret, const float x, const float y) {
+    ret.x += x; ret.y += y;
+    TFX_desenhar_rect(ren, rect_f_para_rect(ret));
+}
+
+TFXDEF
+void TFX_desenhar_rect_cor_f(SDL_Renderer* ren,
+                             const SDL_FRect ret, const SDL_Color cor) {
+    TFX_mudar_cor(ren, cor);
+    TFX_desenhar_rect_f(ren, ret);
+}
+
+TFXDEF
+void TFX_desenhar_rects_cor_f(SDL_Renderer* ren,
+                              const SDL_FRect rects[],
+                              const SDL_Color cores[],
+                              size_t num_rects) {
+    for (size_t i = 0; i < num_rects; i++) {
+        TFX_desenhar_rect_cor_f(ren, rects[i], cores[i]);
+    }
+}
+
+
 /* OUTRAS FORMAS */
 
 TFXDEF
 void TFX_desenhar_caixa_arredondada_cor(SDL_Renderer* renderer,
                                         SDL_Rect rect, int16_t r,
-                                        struct cor cor) {
+                                        SDL_Color cor) {
     TFX_Box caixa = rect_para_caixa(rect);
     roundedBoxRGBA(renderer, caixa.x0, caixa.y0,
                              caixa.x1, caixa.y1, r, splat(cor));
@@ -99,27 +173,27 @@ void TFX_desenhar_caixa_arredondada_cor(SDL_Renderer* renderer,
 TFXDEF
 void TFX_desenhar_caixa_arredondada(SDL_Renderer* renderer,
                                     SDL_Rect caixa, int16_t rad) {
-    struct cor cor = TFX_cor_atual(renderer);
+    SDL_Color cor = TFX_cor_atual(renderer);
     TFX_desenhar_caixa_arredondada_cor(renderer, caixa, rad, cor);
 }
 
 TFXDEF
 void TFX_desenhar_disco_cor(SDL_Renderer *renderer,
                             int16_t cx, int16_t cy, int16_t rad,
-                            const struct cor cor) {
+                            const SDL_Color cor) {
     filledCircleRGBA(renderer, cx, cy, rad, splat(cor));
 }
 
 TFXDEF
 void TFX_desenhar_disco(SDL_Renderer *renderer,
                         int16_t cx, int16_t cy, int16_t rad) {
-    struct cor cor = TFX_cor_atual(renderer);
+    SDL_Color cor = TFX_cor_atual(renderer);
     TFX_desenhar_disco_cor(renderer, cx, cy, rad, cor);
 }
 
 TFXDEF
 void TFX_desenhar_linha_cor(SDL_Renderer *renderer,
-                            TFX_Line linha, uint8_t largura, struct cor cor) {
+                            TFX_Line linha, uint8_t largura, SDL_Color cor) {
     thickLineRGBA(renderer, linha.x0,linha.y0,
                             linha.x1,linha.y1, largura, splat(cor));
 }
@@ -127,7 +201,7 @@ void TFX_desenhar_linha_cor(SDL_Renderer *renderer,
 TFXDEF
 void TFX_desenhar_linha(SDL_Renderer *renderer,
                         TFX_Line linha, uint8_t largura) {
-    struct cor cor = TFX_cor_atual(renderer);
+    SDL_Color cor = TFX_cor_atual(renderer);
     TFX_desenhar_linha_cor(renderer, linha, largura, cor);
 }
 
@@ -142,14 +216,15 @@ void TFX_mudar_tamanho_fonte(unsigned int tam_fonte) {
 TFXDEF
 void TFX_desenhar_texto_cor(SDL_Renderer *ren,
                             const char *str, int16_t x, int16_t y,
-                            const struct cor cor) {
+                            const SDL_Color cor) {
     stringRGBA(ren, x, y, str, splat(cor));
 }
 
 TFXDEF
 void TFX_desenhar_texto(SDL_Renderer *ren,
                         const char *str, int16_t x, int16_t y) {
-    struct cor cor = TFX_cor_atual(ren);
+    SDL_Color cor = TFX_cor_atual(ren);
     TFX_desenhar_texto_cor(ren, str, x, y, cor);
 }
 
+#endif//_TFX_H_

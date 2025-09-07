@@ -22,7 +22,7 @@ int main () {
 
     /* EXECUÇÃO */
     size_t num_rects = 1;
-    struct cor cores[MAX_RECTS+1] = {
+    SDL_Color cores[MAX_RECTS+1] = {
         AZUL,
         VERDE, AMARELO, VERMELHO, PRETO, AZUL_BEBE,
         CIANO, LARANJA, VERMELHO_M, CINZA, MAGENTA,

@@ -60,7 +60,7 @@ void desenhar_cores(SDL_Renderer* ren, const uint16_t escala) {
     if (escala <= 1) return;
 
     const struct quad {
-        SDL_Rect ret; struct cor cor;
+        SDL_Rect ret; SDL_Color cor;
     } quads[] = {
         { grade(0, 1, escala), AZUL     },
         { grade(1, 2, escala), VERDE    },

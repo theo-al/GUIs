@@ -3,7 +3,7 @@
 
 #define LEN(arr) (sizeof(arr)/sizeof(*arr))
 
-void mudar_cor(SDL_Renderer* ren, struct cor cor) {
+void mudar_cor(SDL_Renderer* ren, SDL_Color cor) {
     SDL_SetRenderDrawColor(ren, splat(cor));
 }
 
