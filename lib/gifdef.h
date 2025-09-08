@@ -3,9 +3,11 @@
 #endif
 
 #ifdef GERAR_GIF
+  #include <SDL2/SDL.h>
+  #include "AUX.h"
+
   #define MSF_GIF_IMPL
   #include "msf_gif.h"
-  #include <SDL2/SDL.h>
 
   #ifndef QUALITY // nível de qualidade das cores do gif
     #define QUALITY 16 /*1 a 16*/
@@ -45,7 +47,7 @@
   #define TODOS (TANTOS <= 1)
   #define CADA(tantos, frame) ((frame % tantos) == 0)
   #define GIF_FRAME_COND(renderer, dt, cond) do { \
-              static int fr, tt; tt += dt; \
+              static uint32_t fr, tt; tt += dt; \
               if (TODOS || CADA(TANTOS, fr)) { \
                   GIF_FRAME(renderer, tt); tt = 0; \
               } fr++; \
@@ -83,14 +85,16 @@
                 GIF_FRAME_COND(ren, 10, !SCREENSHOT)
     #else
         #define SDL_RenderPresent(ren) do { \
-            GIF_FRAME_COND(ren, 10, !SCREENSHOT); \
+            static uint32_t antes; \
+            if (antes == 0) antes = SDL_GetTicks(); \
+            GIF_FRAME_COND(ren, AUX_dt(antes, &antes), !SCREENSHOT); \
             SDL_RenderPresent(ren); \
         } while(0)
     #endif
 
-    #define SDL_DestroyRenderer(ren) do { \
+    #define SDL_Quit() do { \
         GIF_SAVE(); \
-        SDL_DestroyRenderer(ren); \
+        SDL_Quit(); \
     } while(0)
   #endif
 
