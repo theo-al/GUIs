@@ -55,19 +55,15 @@ int main () {
         uint32_t delta = dt(antes, &antes);
 
         switch (evt.type) {
-          case SDL_KEYDOWN: {
-              switch (evt.key.keysym.sym) {
-                case SDLK_UP:    vel_teclado.y = -VEL; break;
-                case SDLK_DOWN:  vel_teclado.y = +VEL; break;
-                case SDLK_LEFT:  vel_teclado.x = -VEL; break;
-                case SDLK_RIGHT: vel_teclado.x = +VEL; break;
-              }
+          case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
+              case SDLK_UP:    vel_teclado.y = -VEL; break;
+              case SDLK_DOWN:  vel_teclado.y = +VEL; break;
+              case SDLK_LEFT:  vel_teclado.x = -VEL; break;
+              case SDLK_RIGHT: vel_teclado.x = +VEL; break;
           } break;
-          case SDL_KEYUP: {
-              switch (evt.key.keysym.sym) {
-                case SDLK_UP:   case SDLK_DOWN:  vel_teclado.y = 0; break;
-                case SDLK_LEFT: case SDLK_RIGHT: vel_teclado.x = 0; break;
-              }
+          case SDL_KEYUP: switch (evt.key.keysym.sym) {
+              case SDLK_UP:   case SDLK_DOWN:  vel_teclado.y = 0; break;
+              case SDLK_LEFT: case SDLK_RIGHT: vel_teclado.x = 0; break;
           } break;
 
           case SDL_MOUSEMOTION: {
