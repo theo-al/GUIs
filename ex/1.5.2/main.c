@@ -23,22 +23,16 @@ int32_t dt(uint32_t antes, uint32_t* depois) {
     return delta;
 }
 
-bool TFX_WaitEventTimeout(SDL_Event* evt, uint32_t* ms, uint32_t timeout) {
+int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* ms) {
     static uint32_t antes;
     if (antes == 0) antes = SDL_GetTicks();
 
     bool evento = SDL_WaitEventTimeout(evt, *ms);
-    if (!evento) *ms = timeout;
-    else {
+    if (evento) {
         uint32_t delta = dt(antes, &antes);
         *ms = (delta < *ms) ? *ms - delta : 0;
     }
-
     return evento;
-}
-
-int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* ms) {
-    return TFX_WaitEventTimeout(evt, ms, TIMEOUT);
 }
 
 static const SDL_Rect janela = {.w = WIDTH, .h = HEIGHT};
@@ -71,9 +65,10 @@ int main () {
     uint32_t falta = TIMEOUT;
     uint32_t antes = SDL_GetTicks();
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
-        AUX_WaitEventTimeoutCount(&evt, &falta);
-        uint32_t delta = dt(antes, &antes);
+        bool evento = AUX_WaitEventTimeoutCount(&evt, &falta);
+        if (!evento) falta = TIMEOUT;
 
+        uint32_t delta = dt(antes, &antes);
         switch (evt.type) {
           case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
               case SDLK_UP:    vel_teclado.y = -VEL_TECL; break;
