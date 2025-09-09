@@ -39,8 +39,8 @@ int main() {
     SDL_Rect r = { 0,0, TAM_RET,TAM_RET };
 
     /* EXECUÇÃO */
-    SDL_Event evt;
-    for (float t = 0; evt.type != SDL_QUIT; ) {
+    float t = 0;
+    for (SDL_Event evt; evt.type != SDL_QUIT; ) {
         const bool timeout = !AUX_WaitEventTimeout(&evt, &falta, TIMEOUT);
 
         t += DT(antes, &antes)/(float)SEGUNDO;
