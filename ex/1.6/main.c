@@ -16,6 +16,23 @@
 #define VEL_TECL (30.0/1000)
 #define VEL_AUTO (20.0/1000)
 
+void desenhar_tabuleiro(SDL_Renderer* ren, SDL_Rect tab,
+                        int num_casas_x, int num_casas_y) {
+    SDL_Rect casa = {
+        .w = tab.w/num_casas_x,
+        .h = tab.h/num_casas_y,
+    };
+    for (int i = 0; i < num_casas_x; i++) {
+        for (int j = 0; j < num_casas_y; j++) {
+            const SDL_Color cor = (i % 2)^(j % 2) ? BRANCO : PRETO;
+
+            casa.x = tab.x + i*casa.w;
+            casa.y = tab.y + j*casa.h;
+
+            TFX_desenhar_rect_cor(ren, casa, cor);
+        }
+    }
+}
 
 static const SDL_Rect janela = {.w = WIDTH, .h = HEIGHT};
 int main () {
@@ -70,14 +87,26 @@ int main () {
           } break;
         }
 
+        /* LINHA DE CHEGADA */
+        const int pad = RH/2, ipad = WIDTH - pad;
+        SDL_Rect chegada = {
+            .x = ipad - WIDTH/5, .y = pad,
+            .w =        WIDTH/5, .h = HEIGHT-pad*2,
+        };
+        const int num_casas_x = 7, num_casas_y = 11;
+
         /* MOVIMENTO DOS RETÂNGULOS */
         teclado->x += vel_teclado*delta;
         tempo->x += vel_auto*delta;
         TFX_ClampRectPosF(teclado, janela);
         TFX_ClampRectPosF(tempo, janela);
 
+        /* GANHAR */
+        //! [colidir com chegada]
+
         /* RENDERIZAÇÃO */
         TFX_limpar_tela_cor(ren, BRANCO);
+        desenhar_tabuleiro(ren, chegada, num_casas_x, num_casas_y);
         TFX_desenhar_rects_cor_f(ren, rects, cores, LEN(rects));
         SDL_RenderPresent(ren);
     }
