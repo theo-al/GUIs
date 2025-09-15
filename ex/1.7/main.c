@@ -22,7 +22,7 @@
 #define VELOCIDADE 80.0 /*px/s*/
 
 #define SEGUNDO 1000 /*ms*/
-#define TIMEOUT 16.0 /*ms*/
+#define TIMEOUT 50.0 /*ms*/
 
 int main() {
     /* INICIALIZAÇÃO */
@@ -33,8 +33,9 @@ int main() {
                           WIDTH, HEIGHT, SDL_WINDOW_SHOWN
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
-    //SDL_Texture* img = IMG_LoadTexture(ren, "tirinha.jpg");
-    SDL_Texture* img = IMG_LoadTexture(ren, "ex/1.7/tirinha.jpg");
+
+    SDL_Texture* img = IMG_LoadTexture(ren, "tirinha.jpg");
+    if (!img)    img = IMG_LoadTexture(ren, "ex/1.7/tirinha.jpg");
     assert(img != NULL);
 
     /* ESTADO */
