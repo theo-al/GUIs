@@ -227,4 +227,12 @@ void TFX_desenhar_texto(SDL_Renderer *ren,
     TFX_desenhar_texto_cor(ren, str, x, y, cor);
 }
 
+
+/* TEXTURAS e IMAGENS */
+
+TFXDEF
+void TFX_desenhar_textura(SDL_Renderer *ren, SDL_Texture* tex, SDL_Rect r) {
+    SDL_RenderCopy(ren, tex, NULL, &r);
+}
+
 #endif//_TFX_H_
