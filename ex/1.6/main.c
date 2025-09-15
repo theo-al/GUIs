@@ -18,29 +18,8 @@
 #define VEL_AUTO (20.0/1000)
 
 
-void inicializar_rects(SDL_FRect* rects);
-bool chegou(SDL_FRect* competidor, SDL_FRect* linha_de_chegada);
 void desenhar_tabuleiro(SDL_Renderer* ren, const SDL_FRect tab,
                         const int num_casas_x, const int num_casas_y);
-
-
-void desenhar_tabuleiro(SDL_Renderer* ren, const SDL_FRect tab,
-                        const int num_casas_x, const int num_casas_y) {
-    SDL_Rect casa = {
-        .w = tab.w/num_casas_x,
-        .h = tab.h/num_casas_y,
-    };
-    for (int i = 0; i < num_casas_x; i++) {
-        for (int j = 0; j < num_casas_y; j++) {
-            const SDL_Color cor = (i % 2)^(j % 2) ? BRANCO : PRETO;
-
-            casa.x = tab.x + i*casa.w;
-            casa.y = tab.y + j*casa.h;
-
-            TFX_desenhar_rect_cor(ren, casa, cor);
-        }
-    }
-}
 
 void inicializar_rects(SDL_FRect* rects){
     *rects++ = (SDL_FRect){ .x = RW, .y = RH + 0*HEIGHT/3, RW,RH };
@@ -51,6 +30,7 @@ void inicializar_rects(SDL_FRect* rects){
 bool chegou(SDL_FRect* competidor, SDL_FRect* linha_de_chegada) {
     return SDL_HasIntersectionF(competidor, linha_de_chegada);
 }
+
 
 static const SDL_Rect janela = {.w = WIDTH, .h = HEIGHT};
 int main () {
@@ -65,18 +45,17 @@ int main () {
 
 
     /* INICIALIZAÇÃO DO ESTADO */
-    SDL_Color cores[3] = { AZUL, VERDE, AMARELO, };
-    SDL_FRect rects[3]; inicializar_rects(rects);
-
-    SDL_FRect* r = rects;
-    SDL_FRect *tempo = r++, *teclado = r++, *mouse = r++;
-
     uint32_t final = 0;
     SDL_FRect* vencedor = NULL;
 
-    float vel_auto = VEL_AUTO;
-    float vel_teclado = 0;
+    float      vels[3] = { VEL_AUTO, 0, 0 };
+    SDL_Color cores[3] = { AZUL, VERDE, AMARELO };
+    SDL_FRect rects[3]; inicializar_rects(rects);
 
+    SDL_FRect* r = rects;
+    SDL_FRect *const tempo = r++, *const teclado = r++, *const mouse = r++;
+
+    char* nomes[3] = { "tempo", "teclado", "mouse" };
 
     /* LINHA DE CHEGADA */
     const int pad = RH/2, ipad = WIDTH - pad;
@@ -96,12 +75,12 @@ int main () {
 
         switch (evt.type) {
           case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
-              case SDLK_LEFT:  vel_teclado = -VEL_TECL; break;
-              case SDLK_RIGHT: vel_teclado = +VEL_TECL; break;
+              case SDLK_LEFT:  vels[teclado-rects] = -VEL_TECL; break;
+              case SDLK_RIGHT: vels[teclado-rects] = +VEL_TECL; break;
           } break;
           case SDL_KEYUP: switch (evt.key.keysym.sym) {
-              case SDLK_LEFT:  vel_teclado = 0; break;
-              case SDLK_RIGHT: vel_teclado = 0; break;
+              case SDLK_LEFT:  vels[teclado-rects] = 0; break;
+              case SDLK_RIGHT: vels[teclado-rects] = 0; break;
           } break;
 
           case SDL_MOUSEMOTION: if (!chegou(mouse, &chegada)) {
@@ -110,41 +89,35 @@ int main () {
         }
 
         /* MOVIMENTO DOS RETÂNGULOS */
-        if (!chegou(teclado, &chegada)) teclado->x += vel_teclado*delta;
-        if (!chegou(tempo, &chegada))   tempo->x   += vel_auto*delta;
-
         for (size_t i = 0; i < LEN(rects); i++) {
+            if (chegou(&rects[i], &chegada)) continue;
+
+            rects[i].x += vels[i]*delta;
             TFX_ClampRectPosF(&rects[i], janela);
         }
 
+        /* VITÓRIA */
+        bool todos = true;
+        for (size_t i = 0; i < LEN(rects); i++) {
+            if (chegou(&rects[i], &chegada)) {
+                vencedor = vencedor ?: &rects[i];
+            } else todos = false;
+        }
+        if (todos) final = final ?: SDL_GetTicks();
+
         /* REINÍCIO */
-        if (final && SDL_GetTicks() - final > 1000) {
+        if (final) if (SDL_GetTicks() - final > 1000) {
             final = 0; vencedor = NULL;
             inicializar_rects(rects);
         }
-
-        /* CONDIÇÃO DE CHEGADA */
-        bool fim = true;
-        for (size_t i = 0; i < LEN(rects); i++) {
-            if (chegou(&rects[i], &chegada)) {
-                if (!vencedor) vencedor = &rects[i];
-            } else fim = false;
-        }
-        if (fim) final = final ?: SDL_GetTicks();
 
         /* RENDERIZAÇÃO */
         TFX_limpar_tela_cor(ren, BRANCO);
         desenhar_tabuleiro(ren, chegada, num_casas_x, num_casas_y);
         TFX_desenhar_rects_cor_f(ren, rects, cores, LEN(rects));
         if (final) {
-            char* nome_vencedor = NULL;
-            if      (vencedor == tempo)   nome_vencedor = "tempo";
-            else if (vencedor == teclado) nome_vencedor = "teclado";
-            else if (vencedor == mouse)   nome_vencedor = "mouse";
-            else assert(!"unreachable");
-
             char msg[LEN("O vencedor eh ") + LEN("teclado")] = "";
-            sprintf(msg, "O vencedor eh %s", nome_vencedor);
+            sprintf(msg, "O vencedor eh %s", nomes[vencedor-rects]);
             TFX_desenhar_texto_cor(ren, msg, 0,10, PRETO);
         }
 
@@ -156,4 +129,22 @@ int main () {
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
+}
+
+void desenhar_tabuleiro(SDL_Renderer* ren, const SDL_FRect tab,
+                        const int num_casas_x, const int num_casas_y) {
+    SDL_Rect casa = {
+        .w = tab.w/num_casas_x,
+        .h = tab.h/num_casas_y,
+    };
+    for (int i = 0; i < num_casas_x; i++) {
+        for (int j = 0; j < num_casas_y; j++) {
+            const SDL_Color cor = (i % 2)^(j % 2) ? BRANCO : PRETO;
+
+            casa.x = tab.x + i*casa.w;
+            casa.y = tab.y + j*casa.h;
+
+            TFX_desenhar_rect_cor(ren, casa, cor);
+        }
+    }
 }
