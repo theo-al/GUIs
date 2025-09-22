@@ -24,14 +24,22 @@
 
 //! fazer AUX_NextEventTimeout() com a mesma assinatura WaitEventTimeout
 
+typedef enum {
+    AUX_TIMEOUTEVENT = 0,
+    AUX_DOUBLECLICKEVENT,
+} AUX_EventType;
+
+void AUX_FillTimeout(SDL_Event* evt) {
+     evt->user = (SDL_UserEvent) {
+         .type = SDL_USEREVENT,
+         .code = AUX_TIMEOUTEVENT,
+         .timestamp = SDL_GetTicks(),
+     };
+}
+
 void AUX_EmitTimeout() {
-    SDL_Event evt = {
-        .user = {
-            .type = SDL_USEREVENT,
-            .code = 0,
-            .timestamp = SDL_GetTicks(),
-        },
-    };
+    SDL_Event evt;
+    AUX_FillTimeout(&evt);
     SDL_PushEvent(&evt);
 }
 
@@ -49,20 +57,21 @@ SDL_Point xy(const void* data1) {
     };
 }
 
-void AUX__EmitDoubleClickAndReset(int* count, SDL_MouseButtonEvent info) {
-    SDL_Event evt = {
-        .user = {
-            .type = SDL_USEREVENT,
-            .code = *count,
-            .data1 = data1(info.x, info.y),
-            .timestamp = SDL_GetTicks(),
-        },
+void AUX__FillDoubleClick(SDL_Event* evt, uintptr_t count, SDL_MouseButtonEvent info) {
+    evt->user = (SDL_UserEvent) {
+        .type = SDL_USEREVENT,
+        .code = AUX_DOUBLECLICKEVENT,
+        .data1 = data1(info.x, info.y),
+        .data2 = (void*)count,
+        .timestamp = SDL_GetTicks(),
     };
-    *count = 0;
+}
+void AUX__EmitDoubleClickAndReset(int* count, SDL_MouseButtonEvent info) {
+    SDL_Event evt;
+    AUX__FillDoubleClick(&evt, *count, info); *count = 0;
     SDL_PushEvent(&evt);
 }
 
-//! lidar com eventos (timestamps) repetidos?
 //! tentar permitir desviar alguns pixels do lugar?
 void AUX_DoubleClick(SDL_Event evt, uint32_t timeout) {
     static SDL_MouseButtonEvent old = {0};
@@ -111,22 +120,24 @@ int main() {
                   case SDLK_r: break; //! resetar
               } break;
 
-              case SDL_USEREVENT: {
-                  const unsigned int num_cliques = evt.user.code;
-                  if (num_cliques == 0) break;
+              case SDL_USEREVENT: switch ((AUX_EventType)evt.user.code) {
+                  case AUX_TIMEOUTEVENT: break;
+                  case AUX_DOUBLECLICKEVENT: {
+                      uint32_t num_cliques = (uintptr_t)evt.user.data2;
+                      if (num_cliques == 0) break;
 
-                  if (vel.x != 0 && vel.y != 0) break;
-                  SDL_Point pos = xy(evt.user.data1);
-                  SDL_FPoint ds = {
-                      .x = (r.x - r.w/2) - pos.x,
-                      .y = (r.y - r.h/2) - pos.y,
-                  };
-                  //SDL_Log("%d, %6.2f %6.2f", num_cliques, ds.x, ds.y);
+                      if (vel.x != 0 && vel.y != 0) break;
+                      SDL_Point pos = xy(evt.user.data1);
+                      SDL_FPoint ds = {
+                          .x = (r.x - r.w/2) - pos.x,
+                          .y = (r.y - r.h/2) - pos.y,
+                      };
 
-                  vel.x += ds.x*num_cliques*num_cliques;
-                  vel.y += ds.y*num_cliques*num_cliques;
+                      vel.x += ds.x*num_cliques*num_cliques;
+                      vel.y += ds.y*num_cliques*num_cliques;
 
-                  intensidade = num_cliques;
+                      intensidade = num_cliques;
+                  } break;
               } break;
             }
         } else {
