@@ -60,41 +60,11 @@ SDL_Color TFX_cor_atual(SDL_Renderer *renderer) {
 
 /* RECT */
 
-TFXDEF
-void TFX_ClampRectPos(SDL_Rect* ret, const SDL_Rect win) {
-    if (ret->x < win.x) ret->x = win.x;
-    if (ret->y < win.y) ret->y = win.y;
-
-    if (ret->x+ret->w > win.x+win.w) ret->x = win.x+win.w - ret->w;
-    if (ret->y+ret->h > win.y+win.h) ret->y = win.y+win.h - ret->h;
-}
-
-TFXDEF
-void TFX_ClampRectPosF(SDL_FRect* ret, const SDL_Rect win) {
-    if (ret->x < win.x) ret->x = win.x;
-    if (ret->y < win.y) ret->y = win.y;
-
-    if (ret->x+ret->w > win.x+win.w) ret->x = win.x+win.w - ret->w;
-    if (ret->y+ret->h > win.y+win.h) ret->y = win.y+win.h - ret->h;
-}
-
-TFXDEF
-void TFX_WrapRectPos(SDL_Rect* ret, const SDL_Rect win) {
-    if (ret->x < win.x) ret->x = win.x+win.w - ret->w;
-    if (ret->y < win.y) ret->y = win.y+win.h - ret->h;
-
-    if (ret->x+ret->w > win.x+win.w) ret->x = win.x;
-    if (ret->y+ret->h > win.y+win.h) ret->y = win.y;
-}
-
-TFXDEF
-void TFX_WrapRectPosF(SDL_FRect* ret, const SDL_Rect win) {
-    if (ret->x < win.x) ret->x = win.x+win.w - ret->w;
-    if (ret->y < win.y) ret->y = win.y+win.h - ret->h;
-
-    if (ret->x+ret->w > win.x+win.w) ret->x = win.x;
-    if (ret->y+ret->h > win.y+win.h) ret->y = win.y;
-}
+// Funções movidas, mantidas como macros pela retrocompatibilidade
+#define TFX_ClampRectPos(...) AUX_ClampRectPos(__VA_ARGS__)
+#define TFX_ClampRectPos(...) AUX_ClampRectPos(__VA_ARGS__)
+#define TFX_WrapRectPosF(...) AUX_WrapRectPosF(__VA_ARGS__)
+#define TFX_WrapRectPosF(...) AUX_WrapRectPosF(__VA_ARGS__)
 
 #define TFX_desenhar_rect(ren, ret) TFX_desenhar_rect_offs(ren, ret, 0, 0)
 

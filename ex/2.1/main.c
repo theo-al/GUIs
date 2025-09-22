@@ -16,21 +16,37 @@
 #define W_HEIGHT 480
 
 #define FPS 60
-#define TIMEOUT 1000/FPS
+#define TIMEOUT (1000/FPS)
+#define DOUBLE_CLICK_TIMEOUT 250
 
+#define ATRITO 0.5
 
-//! sinuca
 
 //! criar evento de timeout pra função não demorar pra ver que já foi
 //! ^ fazer AUX_NextEventTimeout() com a mesma assinatura WaitEventTimeout
 //!   ^ antes, fazer AUX_TimeoutEmit() e pôr no else
 
-void AUX__EmitDoubleClickAndReset(int* count) { //! receber first_click
+const uintmax_t half = sizeof(void*)*8/2;
+const uintmax_t mask = ((uintmax_t)(1) << half) - 1;
+void* data1(const intptr_t x, const intptr_t y) {
+    return (void*) (
+        (x << half) | (y & mask)
+    );
+}
+SDL_Point xy(const void* data1) {
+    const uintptr_t xy = (uintptr_t)data1;
+    return (SDL_Point) {
+        .x = (xy >> half), .y = (xy & mask),
+    };
+}
+
+void AUX__EmitDoubleClickAndReset(int* count, SDL_MouseButtonEvent info) {
     SDL_Event evt = {
         .user = {
             .type = SDL_USEREVENT,
-            .timestamp = SDL_GetTicks(),
             .code = *count,
+            .data1 = data1(info.x, info.y),
+            .timestamp = SDL_GetTicks(),
         },
     };
     *count = 0;
@@ -55,13 +71,13 @@ void AUX_DoubleClick(SDL_Event evt, uint32_t timeout) {
 
     const bool far_click = clicking && (new_click && !same_spot);
 
-    if (timed_out || far_click) AUX__EmitDoubleClickAndReset(&count);
+    if (timed_out || far_click) AUX__EmitDoubleClickAndReset(&count, old);
     if (new_click) {
         count++; if (!clicking) old = asClick(evt);
     }
 }
 
-const SDL_Rect ret_ini = {.x = W_WIDTH/2, .y = W_HEIGHT/2, .w = 10, .h = 10};
+const SDL_FRect ret_ini = { .x=W_WIDTH/2, .y=W_HEIGHT/2, .w=10, .h=10 };
 int main() {
     /* INICIALIZACAO */
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -73,32 +89,58 @@ int main() {
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
 
     /* EXECUÇÃO */
-    uint32_t falta = TIMEOUT;
+    uint32_t antes = SDL_GetTicks(), falta = TIMEOUT;
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
         static unsigned int num_cliques;
-        static SDL_Rect r = ret_ini;
+        static SDL_FRect r = ret_ini;
+        static SDL_FPoint vel;
 
         if (AUX_WaitEventTimeout(&evt, &falta, TIMEOUT)) {
-            AUX_DoubleClick(evt, 250);
+            AUX_DoubleClick(evt, DOUBLE_CLICK_TIMEOUT);
             switch (evt.type) {
-              case SDL_MOUSEMOTION: {
-                  r.x = evt.button.x - r.w/2;
-                  r.y = evt.button.y - r.h/2;
-              } break;
+              case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
+-                 case SDLK_R: break; //! resetar
+-             } break;
+
               case SDL_USEREVENT: {
                   num_cliques = evt.user.code;
-                  SDL_Log("%d", num_cliques);
+
+                  if (vel.x != 0 && vel.y != 0) break;
+                  SDL_Point pos = xy(evt.user.data1);
+                  SDL_FPoint ds = {
+                      .x = (r.x - r.w/2) - pos.x,
+                      .y = (r.y - r.h/2) - pos.y,
+                  };
+
+                  vel.x += ds.x*num_cliques*num_cliques;
+                  vel.y += ds.y*num_cliques*num_cliques;
+                  SDL_Log("%d, %6.2f %6.2f", num_cliques, ds.x, ds.y);
               } break;
             }
         } else {
             TFX_limpar_tela_cor(ren, BRANCO);
 
             #define clamp_idx(arr, i) arr[i < LEN(arr) ? i : LEN(arr)-1]
-            SDL_Color cores[] = { AMARELO, LARANJA, VERMELHO };
-            TFX_desenhar_rect_cor(ren, r, clamp_idx(cores, num_cliques-1));
+            SDL_Color cores[] = { PRETO, AMARELO, LARANJA, VERMELHO };
+            TFX_desenhar_rect_cor_f(ren, r, clamp_idx(cores, num_cliques));
 
             SDL_RenderPresent(ren);
         }
+        float dt = DT(antes, &antes)/1000.0;
+        r.x += vel.x*dt; vel.x *= powf(ATRITO, dt*2);
+        if (fabs(vel.x) < .8) vel.x = 0;
+
+        r.y += vel.y*dt; vel.y *= powf(ATRITO, dt*2);
+        if (fabs(vel.y) < .8) vel.y = 0;
+
+        if (vel.x == 0 && vel.y == 0) num_cliques = 0;
+
+        SDL_Rect borda = {.w = W_WIDTH, .h = W_HEIGHT};
+        SDL_FPoint ds = AUX_RectPosAdjustF(r, borda);
+        if (ds.x != 0) { vel.x = -vel.x; r.x += ds.x; }
+        if (ds.y != 0) { vel.y = -vel.y; r.y += ds.y; }
+        AUX_ClampRectPosF(&r, borda);
+
     }
 
     /* FINALIZACAO */
