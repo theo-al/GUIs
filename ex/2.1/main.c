@@ -22,9 +22,18 @@
 #define ATRITO 0.5
 
 
-//! criar evento de timeout pra função não demorar pra ver que já foi
-//! ^ fazer AUX_NextEventTimeout() com a mesma assinatura WaitEventTimeout
-//!   ^ antes, fazer AUX_TimeoutEmit() e pôr no else
+//! fazer AUX_NextEventTimeout() com a mesma assinatura WaitEventTimeout
+
+void AUX_EmitTimeout() {
+    SDL_Event evt = {
+        .user = {
+            .type = SDL_USEREVENT,
+            .code = 0,
+            .timestamp = SDL_GetTicks(),
+        },
+    };
+    SDL_PushEvent(&evt);
+}
 
 const uintmax_t half = sizeof(void*)*8/2;
 const uintmax_t mask = ((uintmax_t)(1) << half) - 1;
@@ -91,7 +100,7 @@ int main() {
     /* EXECUÇÃO */
     uint32_t antes = SDL_GetTicks(), falta = TIMEOUT;
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
-        static unsigned int num_cliques;
+        static unsigned int intensidade;
         static SDL_FRect r = ret_ini;
         static SDL_FPoint vel;
 
@@ -99,11 +108,12 @@ int main() {
             AUX_DoubleClick(evt, DOUBLE_CLICK_TIMEOUT);
             switch (evt.type) {
               case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
--                 case SDLK_R: break; //! resetar
--             } break;
+                  case SDLK_r: break; //! resetar
+              } break;
 
               case SDL_USEREVENT: {
-                  num_cliques = evt.user.code;
+                  const unsigned int num_cliques = evt.user.code;
+                  if (num_cliques == 0) break;
 
                   if (vel.x != 0 && vel.y != 0) break;
                   SDL_Point pos = xy(evt.user.data1);
@@ -111,29 +121,32 @@ int main() {
                       .x = (r.x - r.w/2) - pos.x,
                       .y = (r.y - r.h/2) - pos.y,
                   };
+                  //SDL_Log("%d, %6.2f %6.2f", num_cliques, ds.x, ds.y);
 
                   vel.x += ds.x*num_cliques*num_cliques;
                   vel.y += ds.y*num_cliques*num_cliques;
-                  SDL_Log("%d, %6.2f %6.2f", num_cliques, ds.x, ds.y);
+
+                  intensidade = num_cliques;
               } break;
             }
         } else {
+            AUX_EmitTimeout();
             TFX_limpar_tela_cor(ren, BRANCO);
 
             #define clamp_idx(arr, i) arr[i < LEN(arr) ? i : LEN(arr)-1]
             SDL_Color cores[] = { PRETO, AMARELO, LARANJA, VERMELHO };
-            TFX_desenhar_rect_cor_f(ren, r, clamp_idx(cores, num_cliques));
+            TFX_desenhar_rect_cor_f(ren, r, clamp_idx(cores, intensidade));
 
             SDL_RenderPresent(ren);
         }
         float dt = DT(antes, &antes)/1000.0;
         r.x += vel.x*dt; vel.x *= powf(ATRITO, dt*2);
-        if (fabs(vel.x) < .8) vel.x = 0;
-
         r.y += vel.y*dt; vel.y *= powf(ATRITO, dt*2);
+
+        if (fabs(vel.x) < .8) vel.x = 0;
         if (fabs(vel.y) < .8) vel.y = 0;
 
-        if (vel.x == 0 && vel.y == 0) num_cliques = 0;
+        if (vel.x == 0 && vel.y == 0) intensidade = 0;
 
         SDL_Rect borda = {.w = W_WIDTH, .h = W_HEIGHT};
         SDL_FPoint ds = AUX_RectPosAdjustF(r, borda);
