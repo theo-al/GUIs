@@ -19,13 +19,13 @@
 #define TIMEOUT 1000/FPS
 
 
-//! ttf
+//! sinuca
 
 //! criar evento de timeout pra função não demorar pra ver que já foi
 //! ^ fazer AUX_NextEventTimeout() com a mesma assinatura WaitEventTimeout
 //!   ^ antes, fazer AUX_TimeoutEmit() e pôr no else
 
-void AUX__EmitDoubleClickAndReset(int* count) {
+void AUX__EmitDoubleClickAndReset(int* count) { //! receber first_click
     SDL_Event evt = {
         .user = {
             .type = SDL_USEREVENT,
@@ -40,26 +40,28 @@ void AUX__EmitDoubleClickAndReset(int* count) {
 //! lidar com eventos (timestamps) repetidos?
 //! tentar permitir desviar alguns pixels do lugar?
 void AUX_DoubleClick(SDL_Event evt, uint32_t timeout) {
-    static SDL_MouseButtonEvent last_click = {0};
+    static SDL_MouseButtonEvent old = {0};
     static int count = 0;
 
-    //! quando for 0, setar para o atual
-    const uint32_t then = last_click.timestamp;
+    const bool clicking = (count != 0);
+
+    const uint32_t then = old.timestamp;
     const uint32_t now  = evt.common.timestamp;
-    const bool timed_out = (now - then > timeout);
+    const bool timed_out = clicking && (now - then > timeout);
 
     const bool new_click = (evt.type == SDL_MOUSEBUTTONDOWN);
-    const bool same_spot = (evt.button.x == last_click.x) &&
-                           (evt.button.y == last_click.y);
+    const bool same_spot = (evt.button.x == old.x) &&
+                           (evt.button.y == old.y);
 
-    const bool far_click = new_click && !same_spot;
+    const bool far_click = clicking && (new_click && !same_spot);
 
-    if (timed_out || far_click) {
-        if (count) AUX__EmitDoubleClickAndReset(&count);
+    if (timed_out || far_click) AUX__EmitDoubleClickAndReset(&count);
+    if (new_click) {
+        count++; if (!clicking) old = asClick(evt);
     }
-    if (new_click) { last_click = asClick(evt); count++; }
 }
 
+const SDL_Rect ret_ini = {.x = W_WIDTH/2, .y = W_HEIGHT/2, .w = 10, .h = 10};
 int main() {
     /* INICIALIZACAO */
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -73,37 +75,27 @@ int main() {
     /* EXECUÇÃO */
     uint32_t falta = TIMEOUT;
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
-        static int num_cliques;
-        static SDL_Rect r = {.w = 10, .h = 10};
+        static unsigned int num_cliques;
+        static SDL_Rect r = ret_ini;
 
         if (AUX_WaitEventTimeout(&evt, &falta, TIMEOUT)) {
             AUX_DoubleClick(evt, 250);
             switch (evt.type) {
-              //case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
-              //    case SDLK_UP:   case SDLK_DOWN:  break;
-              //    case SDLK_LEFT: case SDLK_RIGHT: break;
-              //} break;
-              //case SDL_KEYUP: switch (evt.key.keysym.sym) {
-              //    case SDLK_UP:   case SDLK_DOWN:  break;
-              //    case SDLK_LEFT: case SDLK_RIGHT: break;
-              //} break;
               case SDL_MOUSEMOTION: {
                   r.x = evt.button.x - r.w/2;
                   r.y = evt.button.y - r.h/2;
               } break;
               case SDL_USEREVENT: {
-                  num_cliques += evt.user.code;
+                  num_cliques = evt.user.code;
+                  SDL_Log("%d", num_cliques);
               } break;
             }
         } else {
             TFX_limpar_tela_cor(ren, BRANCO);
 
-            #define mod_idx(arr, i) arr[i%LEN(arr)]
-            SDL_Color cores[] = { AZUL, VERDE, VERMELHO, MAGENTA, AMARELO };
-            TFX_desenhar_rect_cor(ren, r, mod_idx(cores, num_cliques));
-
-            //char buf[255] = ""; sprintf(buf, "%d", num_cliques);
-            //TFX_desenhar_texto(ren, buf, 0,0);
+            #define clamp_idx(arr, i) arr[i < LEN(arr) ? i : LEN(arr)-1]
+            SDL_Color cores[] = { AMARELO, LARANJA, VERMELHO };
+            TFX_desenhar_rect_cor(ren, r, clamp_idx(cores, num_cliques-1));
 
             SDL_RenderPresent(ren);
         }
