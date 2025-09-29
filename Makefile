@@ -3,7 +3,7 @@ ALL := $(patsubst %, ex/%/, $(EXS))
 GIF := $(patsubst %, %/main.gif, $(ALL))
 
 CFLAGS = -Wall -Wextra -I lib/
-LFLAGS = -lm -lSDL2 -lSDL2_gfx -lSDL2_image
+LFLAGS = -lm -lSDL2 -lSDL2_gfx -lSDL2_image -lSDL2_ttf
 
 ifneq ($(shell command -v pkg-config;),)
     CFLAGS += $(shell pkg-config --cflags sdl2)
