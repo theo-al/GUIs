@@ -14,5 +14,12 @@ Legenda:
     - reset: coloca o retângulo de volta na posição salva
     - emit: dispara um evento de clique completo no retângulo
 
-[falta escrever explicação melhor, sobre o código em si]
+O "jogo" consiste em algumas cartas empilháveis, inicialmente pretas.
+Enquanto se segura alguma, ela é trazida ao topo e fica azul.
+Enquanto se arrasta, ela fica vermelha.
+
+Ao fazer um clique numa carta, ela muda de cor permanentemente.
+Clicando mais vezes, a cor muda em ciclo, mas sem voltar a cor preta inicial.
+
+Pode-se cancelar o clique completo ou o arrasto apertando ESC.
 
