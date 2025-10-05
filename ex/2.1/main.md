@@ -15,4 +15,5 @@ Legenda:
     - emit: põe um evento com a quantidade atual de cliques na fila de eventos
 
 O jogo consiste em uma mesa de sinuca com uma bola só, em que a posição do mouse em relação à bola e o número de cliques em sequência determinam a força e direção para onde a bola é movida.
+A cor da bola reflete o número de cliques feitos
 
