@@ -1,6 +1,4 @@
 #include <SDL2/SDL.h>
-
-#include <assert.h>
 #include <stdbool.h>
 
 #include "cores.h"
@@ -38,10 +36,10 @@ void AUX_FillTimeout(SDL_Event* evt) {
 }
 
 void AUX_EmitTimeout() {
-    SDL_Event evt;
-    AUX_FillTimeout(&evt);
+    SDL_Event evt; AUX_FillTimeout(&evt);
     SDL_PushEvent(&evt);
 }
+
 
 const uintmax_t half = sizeof(void*)*8/2;
 const uintmax_t mask = ((uintmax_t)(1) << half) - 1;
@@ -72,28 +70,24 @@ void AUX__EmitDoubleClickAndReset(int* count, SDL_MouseButtonEvent info) {
     SDL_PushEvent(&evt);
 }
 
-//! tentar permitir desviar alguns pixels do lugar?
 void AUX_DoubleClick(SDL_Event evt, uint32_t timeout) {
     static SDL_MouseButtonEvent old = {0};
     static int count = 0;
 
-    const bool clicking = (count != 0);
-
     const uint32_t then = old.timestamp;
     const uint32_t now  = evt.common.timestamp;
+
+    const bool clicking = (count != 0);
     const bool timed_out = clicking && (now - then > timeout);
 
-    const bool new_click = (evt.type == SDL_MOUSEBUTTONDOWN);
-    const bool same_spot = (evt.button.x == old.x) &&
-                           (evt.button.y == old.y);
-
-    const bool far_click = clicking && (new_click && !same_spot);
-
-    if (timed_out || far_click) AUX__EmitDoubleClickAndReset(&count, old);
-    if (new_click) {
+    if (timed_out || (evt.type == SDL_MOUSEMOTION)) {
+        AUX__EmitDoubleClickAndReset(&count, old);
+    }
+    if (evt.type == SDL_MOUSEBUTTONDOWN) {
         count++; if (!clicking) old = asClick(evt);
     }
 }
+
 
 const SDL_FRect ret_ini = { .x=W_WIDTH/2, .y=W_HEIGHT/2, .w=10, .h=10 };
 int main() {
@@ -147,6 +141,7 @@ int main() {
             #define clamp_idx(arr, i) arr[i < LEN(arr) ? i : LEN(arr)-1]
             SDL_Color cores[] = { PRETO, AMARELO, LARANJA, VERMELHO };
             TFX_desenhar_rect_cor_f(ren, r, clamp_idx(cores, intensidade));
+            #undef clamp_idx
 
             SDL_RenderPresent(ren);
         }
