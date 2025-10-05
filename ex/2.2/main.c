@@ -17,7 +17,6 @@
 
 #define FPS 60
 #define TIMEOUT (1000/FPS)
-#define DOUBLE_CLICK_TIMEOUT 250
 
 #define ATRITO 0.5
 
@@ -30,6 +29,7 @@ void AUX_ToEndSzLen(void* arr, size_t size, size_t len, size_t idx);
 
 typedef enum {
     AUX_TIMEOUTEVENT = 0,
+    AUX_SURECLICKEVENT,
 } AUX_EventType;
 
 void AUX_FillTimeout(SDL_Event* evt) {
@@ -51,20 +51,40 @@ typedef struct {
 
     SDL_MouseButtonEvent click;
     SDL_Point offset;
-    bool clicking;
-    bool dragging;
+    enum {
+        UNCLICKED = 0,
+        CLICKING,
+        DRAGGING,
+
+        DRAG_STATE_COUNT,
+    } state;
 } DragDropRect;
 
+
+void AUX__FillSureClick(SDL_Event* evt, DragDropRect* rect) {
+     evt->user = (SDL_UserEvent) {
+         .type = SDL_USEREVENT,
+         .code = AUX_SURECLICKEVENT,
+         .data1 = rect,
+         .timestamp = SDL_GetTicks(),
+     };
+}
+void AUX__EmitSureClick(DragDropRect* rect) {
+    SDL_Event evt; AUX__FillSureClick(&evt, rect);
+    SDL_PushEvent(&evt);
+}
+
 void AUX_DragDropCancel(DragDropRect* self, SDL_Event evt) {
-    const bool clicked = (self->clicking || self->dragging);
+    const bool clicked = (self->state == CLICKING) ||
+                         (self->state == DRAGGING);
 
     switch (evt.type) {
       case SDL_KEYDOWN: switch (evt.key.keysym.sym) {
           case SDLK_ESCAPE: if (clicked) {
               self->r.x = self->click.x + self->offset.x;
               self->r.y = self->click.y + self->offset.y;
-              self->clicking = false;
-              self->dragging = false;
+
+              self->state = UNCLICKED;
           } break;
       } break;
       case SDL_MOUSEBUTTONDOWN: {
@@ -73,22 +93,22 @@ void AUX_DragDropCancel(DragDropRect* self, SDL_Event evt) {
               self->offset.x = self->r.x - loc.x;
               self->offset.y = self->r.y - loc.y;
               self->click = asClick(evt);
-              self->clicking = true;
+
+              self->state = CLICKING;
           }
       } break;
       case SDL_MOUSEBUTTONUP: {
-          self->clicking = false;
-          self->dragging = false;
+          if (self->state == CLICKING) AUX__EmitSureClick(self);
+
+          self->state = UNCLICKED;
       } break;
       case SDL_MOUSEMOTION: if (clicked) {
           self->r.x = evt.button.x + self->offset.x;
           self->r.y = evt.button.y + self->offset.y;
-          self->dragging = true;
-          self->clicking = false;
+
+          self->state = DRAGGING;
       } break;
     }
-
-    assert(self->clicking + self->dragging <= 1);
 }
 
 int main() {
@@ -105,24 +125,35 @@ int main() {
     uint32_t falta = TIMEOUT;
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
         const int rw = W_WIDTH/10, hmid = (W_HEIGHT-rw)/2;
-        static DragDropRect quadrados[] = {
+        static DragDropRect quadrados[4] = {
           { .r.x = W_WIDTH*1/3-rw/2, .r.y = hmid,    .r.w=rw, .r.h=rw },
           { .r.x = W_WIDTH*2/3-rw/2, .r.y = hmid,    .r.w=rw, .r.h=rw },
           { .r.x = W_WIDTH/2  -rw/2, .r.y = hmid-rw, .r.w=rw, .r.h=rw },
           { .r.x = W_WIDTH/2  -rw/2, .r.y = hmid+rw, .r.w=rw, .r.h=rw },
         };
+        static size_t clicks[4] = {0};
 
         AUX_NextEvent(&evt, &falta, TIMEOUT);
         switch (evt.type) {
           case SDL_USEREVENT: switch (evt.user.code) {
+              case AUX_SURECLICKEVENT: {
+                  // size_t idx = evt.user.data1 - (void*)quadrados;
+                  clicks[LEN(clicks)-1] += 1;
+              } break;
+
               case AUX_TIMEOUTEVENT: {
                   TFX_limpar_tela_cor(ren, BRANCO);
 
                   for (size_t i = 0; i < LEN(quadrados); i++) {
-                      SDL_Color cor[] = { PRETO, AZUL, VERMELHO };
-                      const uint8_t idx = (quadrados[i].clicking<<0) +
-                                          (quadrados[i].dragging<<1);
-                      assert(idx < LEN(cor));
+                      const SDL_Color idle[] = {AZUL_BEBE, CINZA, AMARELO_M};
+
+                      const SDL_Color cor[DRAG_STATE_COUNT] = {
+                          clicks[i] ? idle[(clicks[i]-1) % LEN(idle)]
+                                    : PRETO,
+                                      AZUL, VERMELHO_M
+                      };
+
+                      const uint8_t idx = quadrados[i].state;
                       TFX_desenhar_rect_cor(ren, quadrados[i].r, cor[idx]);
                   }
 
@@ -134,8 +165,8 @@ int main() {
         /* LÓGICA */
         for (size_t i = LEN(quadrados); i--; ) {
             AUX_DragDropCancel(&quadrados[i], evt);
-            if (quadrados[i].clicking || quadrados[i].dragging) {
-                AUX_ToEnd(quadrados, i); break;
+            if (quadrados[i].state != UNCLICKED) {
+                  AUX_ToEnd(quadrados, i); AUX_ToEnd(clicks, i); break;
             }
         }
     }
