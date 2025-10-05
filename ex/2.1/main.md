@@ -14,5 +14,5 @@ Legenda:
     - start: salva a posição e horário do clique, count = 1
     - emit: põe um evento com a quantidade atual de cliques na fila de eventos
 
-[falta escrever explicação melhor, sobre o código em si]
+O jogo consiste em uma mesa de sinuca com uma bola só, em que a posição do mouse em relação à bola e o número de cliques em sequência determinam a força e direção para onde a bola é movida.
 
