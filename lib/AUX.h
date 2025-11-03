@@ -14,7 +14,7 @@ int32_t AUX_dt(uint32_t antes, uint32_t* depois) {
     return delta;
 }
 
-bool AUX_WaitEventTimeoutCount(SDL_Event* evt, uint32_t* ms) {
+bool AUX__WaitEventTimeoutCount(SDL_Event* evt, uint32_t* ms) {
     static uint32_t antes;
     if (antes == 0) antes = SDL_GetTicks();
 
@@ -27,7 +27,7 @@ bool AUX_WaitEventTimeoutCount(SDL_Event* evt, uint32_t* ms) {
 }
 
 bool AUX_WaitEventTimeout(SDL_Event* evt, uint32_t* ms, uint32_t timeout) {
-    bool evento = AUX_WaitEventTimeoutCount(evt, ms);
+    bool evento = AUX__WaitEventTimeoutCount(evt, ms);
     if (!evento) *ms = timeout;
 
     return evento;

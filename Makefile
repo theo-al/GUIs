@@ -15,7 +15,7 @@ gifs: $(GIF)
 $(EXS): %: ex/%/
 $(ALL): %/: %/main.out %/main.gif.out
 
-%.out: %.c
+%.out: %.c lib/cores.h lib/AUX.h lib/TFX.h
 	gcc $< -o $@ $(CFLAGS) $(LFLAGS)
 
 %.gif.out: %.c lib/gifdef.h lib/msf_gif.h

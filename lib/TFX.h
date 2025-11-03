@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include "cores.h"
+#include "AUX.h"
 
 #ifndef TFXDEF
   #define TFXDEF static inline
@@ -61,10 +62,10 @@ SDL_Color TFX_cor_atual(SDL_Renderer *renderer) {
 /* RECT */
 
 // Funções movidas, mantidas como macros pela retrocompatibilidade
-#define TFX_ClampRectPos(...) AUX_ClampRectPos(__VA_ARGS__)
-#define TFX_ClampRectPos(...) AUX_ClampRectPos(__VA_ARGS__)
+#define TFX_ClampRectPosF(...) AUX_ClampRectPosF(__VA_ARGS__)
+#define TFX_ClampRectPos(...)  AUX_ClampRectPos(__VA_ARGS__)
 #define TFX_WrapRectPosF(...) AUX_WrapRectPosF(__VA_ARGS__)
-#define TFX_WrapRectPosF(...) AUX_WrapRectPosF(__VA_ARGS__)
+#define TFX_WrapRectPos(...)  AUX_WrapRectPos(__VA_ARGS__)
 
 #define TFX_desenhar_rect(ren, ret) TFX_desenhar_rect_offs(ren, ret, 0, 0)
 
