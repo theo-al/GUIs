@@ -10,9 +10,6 @@
   #define TFXDEF static inline
 #endif
 
-#define LEN(arr) (sizeof(arr)/sizeof(*arr))
-#define UNUSED(x) (void) x
-
 
 typedef struct { int16_t x, y; } TFX_Point;
 typedef struct { int16_t x0,y0, x1,y1; } TFX_Box;

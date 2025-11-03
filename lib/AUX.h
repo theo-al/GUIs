@@ -4,6 +4,12 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
+
+/* MACROS */
+#define LEN(arr) (sizeof(arr)/sizeof(*arr))
+#define UNUSED(x) (void) x
+
+
 /* EVENTOS */
 #define DT(...) AUX_dt(__VA_ARGS__)
 int32_t AUX_dt(uint32_t antes, uint32_t* depois) {
