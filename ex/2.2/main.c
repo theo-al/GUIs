@@ -80,7 +80,7 @@ void AUX_NextEvent(SDL_Event* evt, uint32_t* falta, uint32_t timeout) {
 }
 
 
-/** CLICK, DRAG, CANCEL **/
+/** DRAG, DROP, [CLICK,] CANCEL **/
 typedef struct {
     SDL_Rect r;
 
@@ -167,7 +167,7 @@ void AUX_ToEndSzLen(void* arr, size_t size, size_t len, size_t idx) {
 
 /* PRINCIPAL */
 int main() {
-    /* INICIALIZACAO */
+    /* INICIALIZAÇÃO */
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window* win = SDL_CreateWindow("Drag, Drop, Cancel",
                          SDL_WINDOWPOS_UNDEFINED,
@@ -228,7 +228,7 @@ int main() {
         }
     }
 
-    /* FINALIZACAO */
+    /* FINALIZAÇÃO */
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
