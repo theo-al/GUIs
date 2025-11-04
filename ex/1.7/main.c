@@ -67,13 +67,25 @@ int main() {
             } break;
           }
         } else {
+            static size_t anim_idx = 0;
+
             r.x = CENTRO_X -TAM_RET/2 + RAIO*cos(ang);
             r.y = CENTRO_Y -TAM_RET/2 - RAIO*sin(ang*mult);
 
             TFX_limpar_tela_cor(ren, BRANCO);
-            TFX_desenhar_textura(ren, img, r);
+            const SDL_Rect sub_img[] = {
+                [0] = { .x = 10,           .y = 10, .w = 420, .h = 380 },
+                [1] = { .x = sub_img[0].w, .y = 90, .w = 350, .h = 330 },
+                [2] = {
+                    .x = sub_img[0].x + sub_img[0].w*2/5,
+                    .y = sub_img[1].y + sub_img[1].h,
+                    .w = 350, .h = 310,
+                }
+            };
+            const SDL_Rect sub_rect = sub_img[anim_idx/100 % LEN(sub_img)];
+            SDL_RenderCopy(ren, img, &sub_rect, &r);
 
-            SDL_RenderPresent(ren);
+            SDL_RenderPresent(ren); anim_idx++;
         }
     }
 
