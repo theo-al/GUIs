@@ -67,7 +67,7 @@ int main() {
             } break;
           }
         } else {
-            static size_t anim_idx = 0;
+            static size_t frame_count = 0;
 
             r.x = CENTRO_X -TAM_RET/2 + RAIO*cos(ang);
             r.y = CENTRO_Y -TAM_RET/2 - RAIO*sin(ang*mult);
@@ -82,10 +82,10 @@ int main() {
                     .w = 350, .h = 310,
                 }
             };
-            const SDL_Rect sub_rect = sub_img[anim_idx/100 % LEN(sub_img)];
-            SDL_RenderCopy(ren, img, &sub_rect, &r);
+            const size_t anim_idx = frame_count/100 % LEN(sub_img);
+            SDL_RenderCopy(ren, img, &sub_img[anim_idx], &r);
 
-            SDL_RenderPresent(ren); anim_idx++;
+            SDL_RenderPresent(ren); frame_count++;
         }
     }
 
