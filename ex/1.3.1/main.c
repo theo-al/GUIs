@@ -3,7 +3,7 @@
 #include "gifdef.h"
 
 /* DEFINIÇÕES */
-#define PI  M_PI
+#define PI (3.14159265358979323846)
 #define TAU (2*PI)
 
 #define BRANCO 0xFF,0xFF,0xFF,0x00

@@ -202,11 +202,11 @@ int msf_gif_end_to_file(MsfGifState * handle); //returns 0 on error and non-zero
 #if !defined(MSF_GIF_MALLOC)
 #include <stdlib.h> //malloc, etc.
 #define MSF_GIF_MALLOC(ctx, newSize) \
-        (++ctx, malloc(newSize))
+        ((void)ctx, malloc(newSize))
 #define MSF_GIF_REALLOC(ctx, oldMemory, oldSize, newSize) \
-        (++ctx, realloc(oldMemory, newSize))
+        ((void)ctx, realloc(oldMemory, newSize))
 #define MSF_GIF_FREE(ctx, oldMemory, oldSize) \
-        (++ctx, free(oldMemory))
+        ((void)ctx, free(oldMemory))
 #endif
 
 //instrumentation for capturing profiling traces (useless for the library user, but useful for the library author)

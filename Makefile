@@ -2,7 +2,7 @@ EXS := $(filter-out 0.2, $(shell ls ex/))
 ALL := $(patsubst %, ex/%/, $(EXS))
 GIF := $(patsubst %, %/main.gif, $(ALL))
 
-CFLAGS = -Wall -Wextra -I lib/
+CFLAGS = -Wall -Wextra -Wpedantic --std=c99 -I lib/
 LFLAGS = -lm -lSDL2 -lSDL2_gfx -lSDL2_image
 
 ifneq ($(shell command -v pkg-config;),)
