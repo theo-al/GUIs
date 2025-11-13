@@ -179,7 +179,7 @@ int main() {
     /* EXECUÇÃO */
     uint32_t falta = TIMEOUT;
     for (SDL_Event evt; evt.type != SDL_QUIT; ) {
-        const int rw = W_WIDTH/10, hmid = (W_HEIGHT-rw)/2;
+        static const int rw = W_WIDTH/10, hmid = (W_HEIGHT-rw)/2;
         static DragDropRect quadrados[4] = {
           { .r.x = W_WIDTH*1/3-rw/2, .r.y = hmid,    .r.w=rw, .r.h=rw },
           { .r.x = W_WIDTH*2/3-rw/2, .r.y = hmid,    .r.w=rw, .r.h=rw },
